@@ -184,3 +184,31 @@ DEFINE FIELD criadoEm							ON pedidoVenda TYPE datetime VALUE $before OR time::
 DEFINE FIELD canceladoEm					ON pedidoVenda TYPE datetime;
 DEFINE FIELD atualizadoEm					ON pedidoVenda TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
+DEFINE TABLE crmCategoria SCHEMAFULL;
+DEFINE FIELD descricao						ON crmCategoria TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD corTexto							ON crmCategoria TYPE record<cor> ASSERT $value != NONE;
+DEFINE FIELD corFundo							ON crmCategoria TYPE record<cor> ASSERT $value != NONE;
+DEFINE FIELD criadoEm							ON crmCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm					ON crmCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+
+DEFINE TABLE crm SCHEMAFULL;
+DEFINE FIELD empresa							ON crm TYPE record<empresa> ASSERT $value != NONE;
+DEFINE FIELD cliente							ON crm TYPE record<cliente> ASSERT $value != NONE;
+DEFINE FIELD categoria						ON crm TYPE record<crmCategoria> ASSERT $value != NONE;
+DEFINE FIELD funcionario					ON crm TYPE record<funcionario> ASSERT $value != NONE;
+DEFINE FIELD dataAgendada					ON crm TYPE datetime ASSERT type::is::datetime(type::datetime($value));
+DEFINE FIELD dataRealizada				ON crm TYPE datetime;
+DEFINE FIELD criadoEm							ON crm TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm					ON crm TYPE datetime;
+DEFINE FIELD atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+DEFINE TABLE crmHistorico SCHEMAFULL;
+DEFINE FIELD crm									ON crmHistorico TYPE record<crm> ASSERT $value != NONE;
+DEFINE FIELD descricao						ON crmHistorico TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD categoriaAntes				ON crmHistorico TYPE record<crmCategoria>;
+DEFINE FIELD categoriaDepois			ON crmHistorico TYPE record<crmCategoria>;
+DEFINE FIELD criadoEm							ON crmHistorico TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm					ON crmHistorico TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+
