@@ -203,12 +203,12 @@ DEFINE FIELD criadoEm							ON crm TYPE datetime VALUE $before OR time::now() DE
 DEFINE FIELD canceladoEm					ON crm TYPE datetime;
 DEFINE FIELD atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
-DEFINE TABLE crmHistorico SCHEMAFULL;
-DEFINE FIELD crm									ON crmHistorico TYPE record<crm> ASSERT $value != NONE;
-DEFINE FIELD descricao						ON crmHistorico TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD categoriaAntes				ON crmHistorico TYPE record<crmCategoria>;
-DEFINE FIELD categoriaDepois			ON crmHistorico TYPE record<crmCategoria>;
-DEFINE FIELD criadoEm							ON crmHistorico TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
-DEFINE FIELD atualizadoEm					ON crmHistorico TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+DEFINE TABLE crmObservacoes SCHEMAFULL;
+DEFINE FIELD crm									ON crmObservacoes TYPE record<crm> ASSERT $value != NONE;
+DEFINE FIELD descricao						ON crmObservacoes TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD categoriaAntes				ON crmObservacoes TYPE record<crmCategoria>;
+DEFINE FIELD categoriaDepois			ON crmObservacoes TYPE record<crmCategoria>;
+DEFINE FIELD criadoEm							ON crmObservacoes TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm					ON crmObservacoes TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
