@@ -20,7 +20,7 @@
 	];
 
 	let observacoes: string[] = [];
-	let dadosCliente = $state({
+	let dadosCliente = {
 		email: '',
 		fone1: '',
 		fone2: '',
@@ -30,7 +30,7 @@
 		bairro: '',
 		cidade: '',
 		estado: ''
-	});
+	};
 </script>
 
 <div class="card">

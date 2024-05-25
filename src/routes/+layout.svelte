@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
-	import { AppBar } from '@skeletonlabs/skeleton-svelte';
+	import { AppShell } from '@skeletonlabs/skeleton';
+	import { AppBar } from '@skeletonlabs/skeleton';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Paperclip from 'lucide-svelte/icons/paperclip';
 	import Calendar from 'lucide-svelte/icons/calendar';
@@ -8,17 +9,23 @@
 </script>
 
 <div class="meuContainer w-full">
-	<AppBar>
-		{#snippet lead()}
-			<ArrowLeft size={24} />
-		{/snippet}
-		Title
-		{#snippet trail()}
-			<Paperclip size={20} />
-			<Calendar size={20} />
-			<CircleUser size={20} />
-		{/snippet}
-	</AppBar>
+	<AppShell>
+		<svelte:fragment slot="header">
+			<AppBar>
+				<svelte:fragment slot="lead">(icon)</svelte:fragment>
+				EVG Sistemas
+				<svelte:fragment slot="trail">(actions)</svelte:fragment>
+			</AppBar>
+		</svelte:fragment>
+		<svelte:fragment slot="sidebarLeft">Sidebar Left</svelte:fragment>
+		<!-- (sidebarRight) -->
+		<!-- (pageHeader) -->
+		<!-- Router Slot -->
+		<slot />
+		<!-- ---- / ---- -->
+		<!-- (pageFooter) -->
+		<!-- (footer) -->
+	</AppShell>
 
 	<div class="content">
 		<div class="sidebar preset-filled-surface-100-900">SIDEBAR</div>
