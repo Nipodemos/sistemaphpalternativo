@@ -1,20 +1,34 @@
 import { join } from 'path';
-import { skeleton } from '@skeletonlabs/skeleton/plugin';
-import * as themes from '@skeletonlabs/skeleton/themes';
+import type { Config } from 'tailwindcss';
+import { skeleton } from '@skeletonlabs/tw-plugin';
 
-/** @type {import('tailwindcss').Config} \*/
 export default {
-	darkMode: 'selector',
+	darkMode: 'class',
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
-		join(require.resolve('@skeletonlabs/skeleton-svelte'), '../**/*.{html,js,svelte,ts}')
+		join(require.resolve('@skeletonlabs/skeleton'), '../**/*.{html,js,svelte,ts}')
 	],
 	theme: {
 		extend: {}
 	},
 	plugins: [
 		skeleton({
-			themes: [themes.cerberus, themes.rose]
+			themes: {
+				preset: [
+					{
+						name: 'wintry',
+						enhancements: true
+					},
+					{
+						name: 'modern',
+						enhancements: true
+					},
+					{
+						name: 'skeleton',
+						enhancements: true
+					}
+				]
+			}
 		})
 	]
-};
+} satisfies Config;
