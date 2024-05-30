@@ -33,13 +33,13 @@
 	};
 </script>
 
-<div class="card">
-	<h4 class="h4 mb-2">Cadastrar CRM</h4>
+<h4 class="h4 pl-4 mb-2">Cadastrar CRM</h4>
 
+<div class="card p-2 m-4">
 	<form>
 		<div class="primeiraParte">
 			<label class="label">
-				<span class="label-text">Categoria</span>
+				<span>Categoria</span>
 				<select name="categoria" class="select">
 					{#each categorias as categoria}
 						<option
@@ -52,9 +52,9 @@
 				</select>
 			</label>
 			<label class="label">
-				<span class="label-text">Data do procedimento</span>
+				<span>Data do procedimento</span>
 				<input
-					type="datetime"
+					type="datetime-local"
 					name="dataProcedimento"
 					class="input"
 					placeholder="00/00/0000 00:00"
