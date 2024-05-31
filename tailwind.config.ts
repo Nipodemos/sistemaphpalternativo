@@ -30,6 +30,7 @@ export default {
 				]
 			}
 		}),
-		require('@tailwindcss/forms')
+		require('@tailwindcss/forms'),
+		require('tw-bootstrap-grid-optimizer')
 	]
 } satisfies Config;
