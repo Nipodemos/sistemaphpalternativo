@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { AppBar } from '@skeletonlabs/skeleton';
@@ -14,32 +14,22 @@
 	});
 </script>
 
-<div class="meuContainer w-full">
-	<AppShell>
-		<svelte:fragment slot="header">
-			<AppBar>
-				<svelte:fragment slot="lead">(icon)</svelte:fragment>
-				EVG Sistemas
-				<svelte:fragment slot="trail">(actions)</svelte:fragment>
-			</AppBar>
-		</svelte:fragment>
-		<svelte:fragment slot="sidebarLeft">Sidebar Left</svelte:fragment>
-		<!-- (sidebarRight) -->
-		<!-- (pageHeader) -->
-		<!-- Router Slot -->
-		<div class="p-4 bg-slate-500">
-			<slot />
-		</div>
-		<!-- ---- / ---- -->
-		<!-- (pageFooter) -->
-		<!-- (footer) -->
-	</AppShell>
-</div>
-
-<style>
-	.meuContainer {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-</style>
+<AppShell slotPageContent="p-4 bg-slate-400">
+	<svelte:fragment slot="header">
+		<AppBar>
+			<svelte:fragment slot="lead">(icon)</svelte:fragment>
+			EVG Sistemas
+			<svelte:fragment slot="trail">(actions)</svelte:fragment>
+		</AppBar>
+	</svelte:fragment>
+	<svelte:fragment slot="sidebarLeft">Sidebar Left</svelte:fragment>
+	<!-- (sidebarRight) -->
+	<!-- (pageHeader) -->
+	<!-- Router Slot -->
+	<div class="card p-4 container">
+		<slot />
+	</div>
+	<!-- ---- / ---- -->
+	<!-- (pageFooter) -->
+	<!-- (footer) -->
+</AppShell>
