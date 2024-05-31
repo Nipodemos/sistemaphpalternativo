@@ -2,6 +2,16 @@
 	import '../app.css';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { AppBar } from '@skeletonlabs/skeleton';
+	import type { AfterNavigate } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
+
+	afterNavigate((params: AfterNavigate) => {
+		const isNewPage = params.from?.url.pathname !== params.to?.url.pathname;
+		const elemPage = document.querySelector('#page');
+		if (isNewPage && elemPage !== null) {
+			elemPage.scrollTop = 0;
+		}
+	});
 </script>
 
 <div class="meuContainer w-full">
