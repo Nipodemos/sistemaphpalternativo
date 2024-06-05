@@ -281,3 +281,46 @@ DEFINE FIELD criadoEm							ON crmObservacoes TYPE datetime VALUE $before OR tim
 DEFINE FIELD atualizadoEm					ON crmObservacoes TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
+DEFINE TABLE usuario TYPE NORMAL SCHEMAFULL PERMISSIONS FOR SELECT,CREATE,UPDATE,DELETE FULL;
+
+DEFINE FIELD email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
+DEFINE FIELD empresa 							ON usuario TYPE record<empresa> ASSERT $value != NONE;
+DEFINE FIELD funcionario 					ON usuario TYPE record<funcionario> ASSERT $value != NONE;
+DEFINE FIELD login 								ON usuario TYPE string ASSERT $value != NONE;
+DEFINE FIELD senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
+DEFINE FIELD criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON usuario TYPE datetime;
+
+DEFINE INDEX login_unico ON usuario FIELDS login UNIQUE;
+
+DEFINE TABLE tela SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD menu									ON tela TYPE string ASSERT string::len($value) >= 2;
+DEFINE FIELD submenu							ON tela TYPE string ASSERT string::len($value) >= 2;
+DEFINE FIELD codigo								ON tela TYPE number ASSERT $value > 0;
+DEFINE FIELD icone								ON tela TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD url									ON tela TYPE string ASSERT $value != NONE;
+DEFINE FIELD criadoEm 						ON tela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm 				ON tela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON tela TYPE option<datetime>;
+
+DEFINE INDEX codigo_unico ON tela FIELDS codigo UNIQUE;
+DEFINE INDEX submenu_unico ON tela FIELDS submenu UNIQUE;
+DEFINE INDEX ordem_unica ON tela FIELDS ordem UNIQUE;
+
+DEFINE TABLE permissaoTela SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD usuario							ON permissaoTela TYPE record<usuario> ASSERT $value != NONE;
+DEFINE FIELD tela									ON permissaoTela TYPE record<tela> ASSERT $value != NONE;
+DEFINE FIELD permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
+DEFINE FIELD criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm 				ON permissaoTela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON permissaoTela TYPE datetime;
+
+DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao UNIQUE;
+
