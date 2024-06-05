@@ -4,6 +4,9 @@
 	import { AppBar } from '@skeletonlabs/skeleton';
 	import type { AfterNavigate } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
+	import MenuLateral from '../componentes/menu_lateral.svelte';
+	export let data;
+	let menus = data.menus;
 
 	afterNavigate((params: AfterNavigate) => {
 		const isNewPage = params.from?.url.pathname !== params.to?.url.pathname;
@@ -14,15 +17,15 @@
 	});
 </script>
 
-<AppShell slotPageContent="p-4 bg-slate-400">
+<AppShell slotSidebarLeft="w-60" slotPageContent="p-4 bg-slate-400">
 	<svelte:fragment slot="header">
 		<AppBar>
-			<svelte:fragment slot="lead">(icon)</svelte:fragment>
+			<svelte:fragment slot="lead"><i class="fa-solid fa-user"></i></svelte:fragment>
 			EVG Sistemas
 			<svelte:fragment slot="trail">(actions)</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
-	<svelte:fragment slot="sidebarLeft">Sidebar Left</svelte:fragment>
+	<svelte:fragment slot="sidebarLeft"><MenuLateral {menus} /></svelte:fragment>
 	<!-- (sidebarRight) -->
 	<!-- (pageHeader) -->
 	<!-- Router Slot -->
