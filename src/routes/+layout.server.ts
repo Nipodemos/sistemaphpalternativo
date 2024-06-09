@@ -3,16 +3,14 @@ import { jsonify } from 'surrealdb.js';
 import db from '$lib/database/connection';
 import type { MenuLateral, Tela } from '$lib/types';
 
-export const load: LayoutServerLoad = async () => {
+export const load: LayoutServerLoad = async ({ fetch }) => {
 	const user = await db.info();
 	console.log({ user });
 	let telas: Tela[] = [];
 	if (!user) {
 		telas = await db.select<Tela>('tela').then(jsonify);
-		console.log(telas);
 	} else {
 		telas = await db.select<Tela>('tela').then(jsonify);
-		console.log(telas);
 	}
 
 	const menus: MenuLateral = {};
@@ -23,10 +21,12 @@ export const load: LayoutServerLoad = async () => {
 		menus[tela.menu].push(tela);
 	});
 
-	console.log(telas);
-	console.log(menus);
+	const retorno = await fetch('/api/pegar_estados');
+	const estados = await retorno.json();
+
 	return {
 		telas,
-		menus
+		menus,
+		estados
 	};
 };

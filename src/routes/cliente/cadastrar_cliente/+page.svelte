@@ -8,6 +8,16 @@
 	export let data: PageData;
 	let tabSet: number = 1;
 	const { form } = superForm(data.form);
+	let cidades: { codigo_ibge: string; nome: string }[] = [];
+
+	// variavel que salva se está criando ou atualizando um cliente
+	let estaCadastrando: boolean = data.estaCadastrando;
+	const estados = data.estados;
+
+	const getCidades = async () => {
+		const response = await fetch(`/api/pegar_cidades/${uf}`);
+		cidades = await response.json();
+	};
 </script>
 
 <h2 class="h2">Cadastrar cliente</h2>
@@ -28,7 +38,7 @@
 					<div class="row">
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
-								<span>Nome</span>
+								<span>{$form.cpfcnpj.length > 11 ? 'Razão Social' : 'Nome'}</span>
 								<input class="input" type="text" name="nome" bind:value={$form.nome} />
 							</label>
 						</div>
@@ -38,13 +48,6 @@
 								<input class="input" type="email" name="email" bind:value={$form.email} />
 							</label>
 						</div>
-						<div class="sm:col-6 md:col-4 mb-2">
-							<!-- svelte-ignore a11y-label-has-associated-control -->
-							<label class="label flex flex-col">
-								<span>Parceiro</span>
-								<SlideToggle size="lg" name="slide" bind:checked={$form.parceiro} />
-							</label>
-						</div>
 
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
@@ -52,6 +55,31 @@
 								<input class="input" type="text" name="cpfcnpj" bind:value={$form.cpfcnpj} />
 							</label>
 						</div>
+
+						{#if $form.cpfcnpj.length > 11}
+							<div class="sm:col-6 md:col-4 mb-2">
+								<label class="label">
+									<span>Nome Fantasia</span>
+									<input
+										class="input"
+										type="text"
+										name="nomeFantasia"
+										bind:value={$form.nomeFantasia}
+									/>
+								</label>
+							</div>
+							<div class="sm:col-6 md:col-4 mb-2">
+								<label class="label">
+									<span>Inscrição Estadual</span>
+									<input
+										class="input"
+										type="text"
+										name="inscricaoEstadual"
+										bind:value={$form.inscricaoEstadual}
+									/>
+								</label>
+							</div>
+						{/if}
 
 						<!-- campo de nascimento -->
 						<div class="sm:col-4 md:col-2 mb-2">
@@ -120,20 +148,22 @@
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
 								<span>Cidade</span>
-								<input class="input" type="text" name="cidade" bind:value={$form.cidade} />
+								<select bind:value={$form.cidade} class="select">
+									{#each cidades as cidade}
+										<option value={cidade.codigo_ibge}>{cidade.nome}</option>
+									{/each}
+								</select>
 							</label>
 						</div>
+
 						<!-- campo de estado -->
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
 								<span>Estado</span>
-								<input class="input" type="text" name="estado" bind:value={$form.estado} />
-								<select class="select">
-									<option value="1">Option 1</option>
-									<option value="2">Option 2</option>
-									<option value="3">Option 3</option>
-									<option value="4">Option 4</option>
-									<option value="5">Option 5</option>
+								<select bind:value={$form.estado} on:change={getCidades} class="select">
+									{#each estados as estado}
+										<option value={estado.sigla}>{estado.nome}</option>
+									{/each}
 								</select>
 							</label>
 						</div>
@@ -149,8 +179,7 @@
 								/>
 							</label>
 						</div>
-						<!-- radio group de tipo consumidor, tendo as opções Consumidor final e consumidor normal -->
-						<div class="sm:col-4 md:col-2 mb-2">
+						<!--<div class="sm:col-4 md:col-2 mb-2">
 							<label class="label">
 								<span>Tipo de consumidor</span>
 								<label class="flex items-center label space-x-2">
@@ -182,8 +211,8 @@
 									<input
 										class="radio"
 										type="radio"
-										bind:group={$form.tipoConsumidor}
-										name="tipoConsumidor"
+										bind:group={$form.tipoContribuinte}
+										name="tipoContribuinte"
 										value="contribuinte"
 									/>
 									<p>Contribuinte de ICMS (IE do destinatário obrigatória)</p>
@@ -192,8 +221,8 @@
 									<input
 										class="radio"
 										type="radio"
-										bind:group={$form.tipoConsumidor}
-										name="tipoConsumidor"
+										bind:group={$form.tipoContribuinte}
+										name="tipoContribuinte"
 										value="isento"
 									/>
 									<p>Contribuinte isento de Inscrição no cadastro de contribuintes do ICMS</p>
@@ -202,8 +231,8 @@
 									<input
 										class="radio"
 										type="radio"
-										bind:group={$form.tipoConsumidor}
-										name="tipoConsumidor"
+										bind:group={$form.tipoContribuinte}
+										name="tipoContribuinte"
 										value="naoContribuinte"
 									/>
 									<p>
@@ -211,7 +240,7 @@
 									</p>
 								</label>
 							</label>
-						</div>
+						</div> -->
 					</div>
 				{:else if tabSet === 2}
 					<div class="row"></div>
