@@ -1,3 +1,47 @@
+DEFINE TABLE estado SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD nome									ON estado TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD sigla								ON estado TYPE string ASSERT string::len($value) == 2;
+DEFINE FIELD listaCidades 				ON estado TYPE array<record<cidade>> DEFAULT [];
+DEFINE FIELD criadoEm 						ON estado TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON estado TYPE datetime | null DEFAULT null;
+DEFINE FIELD atualizadoEm 				ON estado TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+DEFINE INDEX uf_unico ON estado FIELDS sigla UNIQUE;
+
+DEFINE TABLE cidade SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD nome									ON cidade TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD estado								ON cidade TYPE record<estado> ASSERT $value != NONE;
+DEFINE FIELD codigoIbge						ON cidade TYPE string ASSERT string::len($value) == 7;
+DEFINE FIELD criadoEm 						ON cidade TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON cidade TYPE datetime | null DEFAULT null;
+DEFINE FIELD atualizadoEm 				ON cidade TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+DEFINE INDEX codigoIbge 					ON cidade FIELDS codigoIbge UNIQUE;
+
+DEFINE TABLE enderecoCompleto SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD dono									ON enderecoCompleto TYPE record | null DEFAULT NULL;
+DEFINE FIELD rua									ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD numero								ON enderecoCompleto TYPE number ASSERT $value > 0;
+DEFINE FIELD complemento					ON enderecoCompleto TYPE string | null DEFAULT null;
+DEFINE FIELD bairro								ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD cidade								ON enderecoCompleto TYPE record<cidade> ASSERT $value != NONE;
+DEFINE FIELD estado								ON enderecoCompleto TYPE record<estado> ASSERT $value != NONE;
+DEFINE FIELD cep									ON enderecoCompleto TYPE string ASSERT string::len($value) == 8;
+DEFINE FIELD criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
+DEFINE FIELD atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+
+
+
 define table fornecedor schemafull TYPE NORMAL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
@@ -160,16 +204,9 @@ DEFINE FIELD fantasia							ON empresa TYPE string ASSERT string::len($value) > 
 DEFINE FIELD cnpj									ON empresa TYPE string ASSERT string::len($value) == 14;
 DEFINE FIELD inscricaoEstadual		ON empresa TYPE string ASSERT string::len($value) < 20;
 DEFINE FIELD enderecoCompleto			ON empresa TYPE record<enderecoCompleto> ASSERT $value != NONE;
-DEFINE FIELD numero								ON empresa TYPE string ASSERT string::len($value) > 1;
-DEFINE FIELD complemento					ON empresa TYPE string | null DEFAULT null;;
-DEFINE FIELD bairro								ON empresa TYPE string ASSERT string::len($value) > 1;
-DEFINE FIELD cidade								ON empresa TYPE string ASSERT string::len($value) > 1;
-DEFINE FIELD codMunicipio					ON empresa TYPE string ASSERT string::len($value) == 7;
-DEFINE FIELD uf										ON empresa TYPE string ASSERT string::len($value) == 2;
-DEFINE FIELD cep									ON empresa TYPE string ASSERT string::len($value) == 8;
 DEFINE FIELD telefone1						ON empresa TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD telefone2						ON empresa TYPE string | null DEFAULT null;
-DEFINE FIELD email								ON empresa TYPE string | null DEFAULT null;
+DEFINE FIELD email								ON empresa TYPE string | null ASSERT $value == null || string::is::email($value) DEFAULT null;
 DEFINE FIELD criadoEm							ON empresa TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON empresa TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON empresa TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -184,13 +221,7 @@ DEFINE FIELD fantasia							ON cliente TYPE string ASSERT string::len($value) > 
 DEFINE FIELD cpfcnpj							ON cliente TYPE string ASSERT string::len($value) == 14 || string::len($value) == 18;
 DEFINE FIELD pessoa								ON cliente TYPE string ASSERT string::contains($value, "F") || string::contains($value, "J");
 DEFINE FIELD inscricaoEstadual		ON cliente TYPE string ASSERT string::len($value) < 20;
-DEFINE FIELD endereco							ON cliente TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD numero								ON cliente TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD complemento					ON cliente TYPE string | null DEFAULT null;;
-DEFINE FIELD bairro								ON cliente TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD cidade								ON cliente TYPE record<cidade> ASSERT string::len($value) > 1;
-DEFINE FIELD estado										ON cliente TYPE record<estado> ASSERT string::len($value) == 2;
-DEFINE FIELD cep									ON cliente TYPE string ASSERT string::len($value) == 8;
+DEFINE FIELD enderecoCompleto			ON cliente TYPE record<enderecoCompleto> ASSERT $value != NONE;
 DEFINE FIELD telefone1						ON cliente TYPE string ASSERT string::len($value) == 16 || string::len($value) == 14;
 DEFINE FIELD telefone2						ON cliente TYPE string | null ASSERT type::is::null($value) || string::len($value) == 16 || string::len($value) == 14 DEFAULT null;
 DEFINE FIELD email								ON cliente TYPE string | null ASSERT type::is::null($value) || string::is::email($value);
@@ -210,14 +241,7 @@ DEFINE FIELD cpfcnpj							ON funcionario TYPE string ASSERT string::len($value)
 DEFINE FIELD pessoa								ON funcionario TYPE string ASSERT $value INSIDE ['F','J'];
 DEFINE FIELD inscricaoEstadual		ON funcionario TYPE string ASSERT string::len($value) < 20;
 DEFINE FIELD nascimento						ON funcionario TYPE datetime ASSERT type::is::datetime(type::datetime($value));
-DEFINE FIELD endereco							ON funcionario TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD numero								ON funcionario TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD complemento					ON funcionario TYPE string;
-DEFINE FIELD bairro								ON funcionario TYPE string ASSERT $value != NONE && string::len($value) > 1;
-DEFINE FIELD cidade								ON funcionario TYPE string ASSERT string::len($value) > 1;
-DEFINE FIELD codMunicipio					ON funcionario TYPE string ASSERT string::len($value) == 7;
-DEFINE FIELD uf										ON funcionario TYPE string ASSERT string::len($value) == 2;
-DEFINE FIELD cep									ON funcionario TYPE string ASSERT string::len($value) == 8;
+DEFINE FIELD enderecoCompleto			ON funcionario TYPE record<enderecoCompleto> ASSERT $value != NONE;
 DEFINE FIELD telefone1						ON funcionario TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD telefone2						ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD email								ON funcionario TYPE string | null DEFAULT null;
@@ -291,7 +315,7 @@ DEFINE TABLE usuario TYPE NORMAL SCHEMAFULL PERMISSIONS FOR SELECT,CREATE,UPDATE
 DEFINE FIELD email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
 DEFINE FIELD empresa 							ON usuario TYPE record<empresa> ASSERT $value != NONE;
 DEFINE FIELD funcionario 					ON usuario TYPE record<funcionario> ASSERT $value != NONE;
-DEFINE FIELD login 								ON usuario TYPE string ASSERT $value != NONE;
+DEFINE FIELD loginSistema					ON usuario TYPE string ASSERT $value != NONE && string::len($value) > 2;
 DEFINE FIELD senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
 DEFINE FIELD criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -329,44 +353,6 @@ DEFINE FIELD canceladoEm 					ON permissaoTela TYPE datetime | null DEFAULT null
 
 DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao UNIQUE;
 
-DEFINE TABLE estado SCHEMAFULL TYPE NORMAL
-	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
-;
-DEFINE FIELD nome									ON estado TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD uf										ON estado TYPE string ASSERT string::len($value) == 2;
-DEFINE FIELD criadoEm 						ON estado TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
-DEFINE FIELD canceladoEm 					ON estado TYPE datetime | null DEFAULT null;
-DEFINE FIELD atualizadoEm 				ON estado TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-
-DEFINE INDEX uf_unico ON estado FIELDS uf UNIQUE;
-
-DEFINE TABLE cidade SCHEMAFULL TYPE NORMAL
-	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
-;
-DEFINE FIELD nome									ON cidade TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD estado								ON cidade TYPE record<estado> ASSERT $value != NONE;
-DEFINE FIELD codigoIbge						ON cidade TYPE string ASSERT string::len($value) == 9;
-DEFINE FIELD criadoEm 						ON cidade TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
-DEFINE FIELD canceladoEm 					ON cidade TYPE datetime | null DEFAULT null;
-DEFINE FIELD atualizadoEm 				ON cidade TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-
-DEFINE TABLE enderecoCompleto SCHEMAFULL TYPE NORMAL
-	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
-;
-DEFINE FIELD dono									ON enderecoCompleto TYPE record ASSERT $value != NONE;
-DEFINE FIELD rua									ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD numero								ON enderecoCompleto TYPE number ASSERT $value > 0;
-DEFINE FIELD complemento					ON enderecoCompleto TYPE string | null DEFAULT null;
-DEFINE FIELD bairro								ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD cidade								ON enderecoCompleto TYPE record<cidade> ASSERT $value != NONE;
-DEFINE FIELD estado								ON enderecoCompleto TYPE record<estado> ASSERT $value != NONE;
-DEFINE FIELD cep									ON enderecoCompleto TYPE string ASSERT string::len($value) == 8;
-DEFINE FIELD criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
-DEFINE FIELD canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
-DEFINE FIELD atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
 
