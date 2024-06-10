@@ -6,22 +6,20 @@ import { z } from 'zod';
 
 const schema = z.object({
 	nome: z.string(),
-	email: z.string().email().optional(),
-	parceiro: z.boolean(),
-	cpfcnpj: z.string().min(11).max(14),
+	fantasia: z.string().optional(),
+	cpfcnpj: z.string().min(14).max(18),
 	nascimento: z.date(),
-	celular: z.string().min(10).max(11),
-	telefone: z.string().min(10).max(11).optional(),
-	cep: z.string().min(8).max(8),
+	inscricaoEstadual: z.string().optional(),
 	endereco: z.string(),
 	numero: z.string(),
 	complemento: z.string().optional(),
 	bairro: z.string(),
 	cidade: z.string(),
 	estado: z.string(),
-	codMunicipio: z.string().optional(),
-	tipoConsumidor: z.enum(['final', 'normal']),
-	tipoContribuinte: z.enum(['isento', 'contribuinte', 'naoContribuinte'])
+	cep: z.string().min(8).max(8),
+	celular: z.string().min(10).max(11),
+	telefone: z.string().min(10).max(11).optional(),
+	email: z.string().email().optional()
 });
 
 export const load: PageServerLoad = async () => {
@@ -30,6 +28,7 @@ export const load: PageServerLoad = async () => {
 	console.log(clientes);
 	return {
 		clientes,
-		form
+		form,
+		estaCadastrando: true
 	};
 };
