@@ -15,7 +15,7 @@
 	const estados = data.estados;
 
 	const getCidades = async () => {
-		const response = await fetch(`/api/pegar_cidades/${uf}`);
+		const response = await fetch(`/api/pegar_cidades/${$form.estado}`);
 		cidades = await response.json();
 	};
 </script>
@@ -64,7 +64,7 @@
 										class="input"
 										type="text"
 										name="nomeFantasia"
-										bind:value={$form.nomeFantasia}
+										bind:value={$form.fantasia}
 									/>
 								</label>
 							</div>
@@ -144,18 +144,6 @@
 								<input class="input" type="text" name="bairro" bind:value={$form.bairro} />
 							</label>
 						</div>
-						<!-- campo de cidade -->
-						<div class="sm:col-6 md:col-4 mb-2">
-							<label class="label">
-								<span>Cidade</span>
-								<select bind:value={$form.cidade} class="select">
-									{#each cidades as cidade}
-										<option value={cidade.codigo_ibge}>{cidade.nome}</option>
-									{/each}
-								</select>
-							</label>
-						</div>
-
 						<!-- campo de estado -->
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
@@ -167,18 +155,20 @@
 								</select>
 							</label>
 						</div>
-						<!-- campo de código de município -->
+						<!-- campo  de cidade -->
 						<div class="sm:col-6 md:col-4 mb-2">
 							<label class="label">
-								<span>Código de Município</span>
-								<input
-									class="input"
-									type="text"
-									name="codMunicipio"
-									bind:value={$form.codMunicipio}
-								/>
+								<span>Cidade</span>
+								<select disabled={cidades.length < 1} bind:value={$form.cidade} class="select">
+									{#each cidades as cidade}
+										<option value={cidade.codigo_ibge}>{cidade.nome}</option>
+									{:else}
+										<option selected value="">Selecione um estado</option>
+									{/each}
+								</select>
 							</label>
 						</div>
+
 						<!--<div class="sm:col-4 md:col-2 mb-2">
 							<label class="label">
 								<span>Tipo de consumidor</span>
