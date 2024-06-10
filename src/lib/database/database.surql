@@ -328,16 +328,13 @@ DEFINE TABLE tela SCHEMAFULL TYPE NORMAL
 ;
 DEFINE FIELD menu									ON tela TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD submenu							ON tela TYPE string ASSERT string::len($value) >= 2;
-DEFINE FIELD codigo								ON tela TYPE number ASSERT $value > 0;
 DEFINE FIELD icone								ON tela TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD url									ON tela TYPE string ASSERT $value != NONE;
 DEFINE FIELD criadoEm 						ON tela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON tela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm 					ON tela TYPE datetime | null DEFAULT null;
 
-DEFINE INDEX codigo_unico ON tela FIELDS codigo UNIQUE;
 DEFINE INDEX submenu_unico ON tela FIELDS submenu UNIQUE;
-DEFINE INDEX ordem_unica ON tela FIELDS ordem UNIQUE;
 
 DEFINE TABLE permissaoTela SCHEMAFULL TYPE NORMAL
 	PERMISSIONS

@@ -15,3 +15,11 @@ export interface Cidade extends BaseTabela {
 	estado: Estado | string;
 	codigoIbge: string;
 }
+
+export interface Tela extends BaseTabela {
+	menu: string;
+	submenu: string;
+	codigo: string;
+	icone: string;
+	url: string;
+}

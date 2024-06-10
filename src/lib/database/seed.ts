@@ -1,6 +1,6 @@
 import { RecordId } from 'surrealdb.js';
 import db from './connection';
-import type { Estado, Cidade } from './types';
+import type { Estado, Cidade, Tela } from './types';
 type retornoApiCidade = {
 	codigo_ibge: string;
 	nome: string;
@@ -11,9 +11,40 @@ type retornoApiEstado = {
 	nome: string;
 };
 async function main() {
-	console.log(await db.info());
-	const retorno = await db.query<Estado[]>('SELECT * FROM estado');
-	console.log('retorno :>> ', retorno);
+	// criando tabela de telas
+
+	const telas = [
+		{
+			menu: 'Clientes',
+			submenu: 'Cadastro de clientes',
+			id: 'cliente',
+			icone: 'fa fa-user',
+			url: '/cliente/listar_cliente'
+		},
+		{
+			menu: 'CRM',
+			submenu: 'Agenda',
+			id: 'agenda',
+			icone: 'fa fa-calendar',
+			url: '/crm/listar_agenda'
+		}
+	];
+
+	for (const tela of telas) {
+		console.log('avaliando tela: ', tela.submenu);
+		const [telaExiste] = await db.query<Tela[][]>(
+			`SELECT * FROM tela:${tela.id} AND url = '${tela.url}'`
+		);
+		if (telaExiste.length === 0) {
+			const resultInsert = await db.insert('tela', tela);
+			if (!resultInsert) {
+				throw new Error('Erro ao inserir tela: ' + tela.submenu);
+			}
+			console.log('tela inserida com sucesso: ' + tela.submenu);
+		} else {
+			console.log('tela já existe: ' + tela.submenu);
+		}
+	}
 
 	const retornoEstados = await fetch('https://brasilapi.com.br/api/ibge/uf/v1');
 	// console.log('retorno :>> ', retorno);
