@@ -12,7 +12,6 @@ type retornoApiEstado = {
 };
 async function main() {
 	// criando tabela de telas
-
 	const telas = [
 		{
 			menu: 'Clientes',
@@ -31,23 +30,22 @@ async function main() {
 	];
 
 	for (const tela of telas) {
-		console.log('avaliando tela: ', tela.submenu);
+		console.log('tela: ', tela.submenu);
 		const [telaExiste] = await db.query<Tela[][]>(
-			`SELECT * FROM tela:${tela.id} AND url = '${tela.url}'`
+			`SELECT * FROM tela where id = tela:${tela.id} AND url = '${tela.url}'`
 		);
 		if (telaExiste.length === 0) {
 			const resultInsert = await db.insert('tela', tela);
 			if (!resultInsert) {
-				throw new Error('Erro ao inserir tela: ' + tela.submenu);
+				throw new Error('    Erro ao inserir tela: ' + tela.submenu);
 			}
-			console.log('tela inserida com sucesso: ' + tela.submenu);
+			console.log('    tela inserida com sucesso: ' + tela.submenu);
 		} else {
-			console.log('tela já existe: ' + tela.submenu);
+			console.log('    tela já existe: ' + tela.submenu);
 		}
 	}
 
 	const retornoEstados = await fetch('https://brasilapi.com.br/api/ibge/uf/v1');
-	// console.log('retorno :>> ', retorno);
 
 	console.log('Vai inserir os estados');
 	const estados: retornoApiEstado[] = await retornoEstados.json();
@@ -69,47 +67,46 @@ async function main() {
 			if (!resultInsert) {
 				throw new Error('    Erro ao inserir estado');
 			}
+			const retornoCidades = await fetch(
+				`https://brasilapi.com.br/api/ibge/municipios/v1/${estado.sigla}?providers=dados-abertos-br,gov,wikipedia`
+			);
+
+			console.log('    inserindo cidades');
+			const cidades: retornoApiCidade[] = await retornoCidades.json();
+			console.log('        ' + cidades.length + ' cidades encontradas');
+			for (const cidade of cidades) {
+				// checar se cidade existe antes de inserir
+				const [cidadeExiste] = await db.query<Cidade[][]>(
+					`SELECT * FROM cidade:ibge${cidade.codigo_ibge}`
+				);
+				if (cidadeExiste.length > 0) {
+					console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
+					continue;
+				}
+				const resultInsert = await db.insert('cidade', {
+					id: new RecordId('cidade', 'ibge' + cidade.codigo_ibge),
+					nome: cidade.nome,
+					estado: new RecordId('estado', estado.sigla),
+					codigoIbge: cidade.codigo_ibge
+				});
+				if (!resultInsert) {
+					throw new Error('        Erro ao inserir cidade');
+				} else {
+					console.log(
+						'        cidade inserida com sucesso: ' + cidade.nome + ' - ' + cidade.codigo_ibge
+					);
+				}
+			}
+
+			if (cidades.length > 0) {
+				db.merge(new RecordId('estado', estado.sigla), {
+					listaCidades: cidades.map((cidade) => new RecordId('cidade', 'ibge' + cidade.codigo_ibge))
+				});
+			}
+			console.log('        cidades inseridas com sucesso');
 		} else {
 			console.log('    estado já existe');
 		}
-
-		const retornoCidades = await fetch(
-			`https://brasilapi.com.br/api/ibge/municipios/v1/${estado.sigla}?providers=dados-abertos-br,gov,wikipedia`
-		);
-
-		console.log('    inserindo cidades');
-		const cidades: retornoApiCidade[] = await retornoCidades.json();
-		console.log('        ' + cidades.length + ' cidades encontradas');
-		for (const cidade of cidades) {
-			// checar se cidade existe antes de inserir
-			const [cidadeExiste] = await db.query<Cidade[][]>(
-				`SELECT * FROM cidade:${cidade.codigo_ibge}`
-			);
-			if (cidadeExiste.length > 0) {
-				console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
-				continue;
-			}
-			const resultInsert = await db.insert('cidade', {
-				id: cidade.codigo_ibge,
-				nome: cidade.nome,
-				estado: new RecordId('estado', estado.sigla),
-				codigoIbge: cidade.codigo_ibge
-			});
-			if (!resultInsert) {
-				throw new Error('        Erro ao inserir cidade');
-			} else {
-				console.log(
-					'        cidade inserida com sucesso: ' + cidade.nome + ' - ' + cidade.codigo_ibge
-				);
-			}
-		}
-
-		if (cidades.length > 0) {
-			db.merge(new RecordId('estado', estado.sigla), {
-				listaCidades: cidades.map((cidade) => new RecordId('cidade', cidade.codigo_ibge))
-			});
-		}
-		console.log('        cidades inseridas com sucesso');
 	}
 	console.log('Estados inseridos com sucesso');
 }
