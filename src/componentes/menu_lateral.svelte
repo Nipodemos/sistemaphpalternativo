@@ -1,22 +1,30 @@
 <script lang="ts">
-	import type { MenuLateral } from '$lib/types';
+	import { page } from '$app/stores';
+	import type { Tela } from '$lib/database/types';
+	type MenuLateral = {
+		[key: string]: Tela[];
+	};
+	console.log('$page :>> ', $page);
+	let valueSingle = $page.route.id;
+	console.log('valueSingle :>> ', valueSingle);
 	export let menus: MenuLateral;
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 </script>
 
 <Accordion>
-	{#each Object.keys(menus) as nomeMenu}
+	{#each Object.keys(menus) as menu}
 		<AccordionItem>
-			<svelte:fragment slot="lead"><i class={menus[nomeMenu][0].icone}></i></svelte:fragment>
-			<svelte:fragment slot="summary">{nomeMenu}</svelte:fragment>
+			<svelte:fragment slot="lead"><i class={menus[menu][0].icone}></i></svelte:fragment>
+			<svelte:fragment slot="summary">{menu}</svelte:fragment>
 			<svelte:fragment slot="content">
 				<nav class="list-nav">
 					<ul>
-						{#each menus[nomeMenu] as dadosMenu}
+						{#each menus[menu] as dadosMenu (dadosMenu.id)}
 							<li>
-								<a href={dadosMenu.url}>
-									<span class="badge bg-primary-500"><i class="fa-solid fa-arrow-right"></i></span>
-									<span class="flex-auto">{dadosMenu.submenu}</span>
+								<a href={dadosMenu.url} class="chip variant-soft hover:variant-tertiary">
+									<span>{dadosMenu.submenu}</span>
+									<span class="flex-1"></span>
+									<i class="fa-solid fa-arrow-right"></i>
 								</a>
 							</li>
 						{/each}
