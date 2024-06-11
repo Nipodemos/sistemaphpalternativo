@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 	let tabSet: number = 1;
-	const { form } = superForm(data.form);
+	const { form, enhance } = superForm(data.form);
 	let cidades: { codigo_ibge: string; nome: string }[] = [];
 
 	// variavel que salva se está criando ou atualizando um cliente
@@ -231,6 +231,13 @@
 								</label>
 							</label>
 						</div> -->
+						<div class="col-10 mt-3"></div>
+						<div class="col-2 mt-4 text-right">
+							<button type="submit" class="btn variant-filled">
+								<i class="fa-solid fa-floppy-disk"></i>
+								<span>Salvar</span>
+							</button>
+						</div>
 					</div>
 				{:else if tabSet === 2}
 					<div class="row"></div>

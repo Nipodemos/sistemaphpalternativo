@@ -1,6 +1,7 @@
 import db from '$lib/database/connection';
+import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 
@@ -31,4 +32,17 @@ export const load: PageServerLoad = async () => {
 		form,
 		estaCadastrando: true
 	};
+};
+
+export const actions = {
+	default: async (request) => {
+		const form = await superValidate(request, zod(schema));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		await db.insert('cliente', form);
+		return message(form, 'Cliente cadastrado com sucesso!');
+	}
 };
