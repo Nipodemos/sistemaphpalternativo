@@ -40,6 +40,12 @@ DEFINE FIELD criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR t
 DEFINE FIELD canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
+DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE' THEN {
+    let $ids = SELECT value id FROM enderecoCompleto where dono == $after.dono;
+    UPDATE $after.dono SET enderecos = (
+        SELECT value id FROM enderecoCompleto where dono = $after.dono
+    )
+};
 
 
 define table fornecedor schemafull TYPE NORMAL
