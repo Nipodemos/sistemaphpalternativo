@@ -1,6 +1,7 @@
-import { RecordId } from 'surrealdb.js';
+import {RecordId} from 'surrealdb.js';
 import db from './connection';
-import type { Estado, Cidade, Tela } from './types';
+import type {Cidade, Estado, Tela} from './types';
+
 type retornoApiCidade = {
 	codigo_ibge: string;
 	nome: string;
@@ -10,6 +11,7 @@ type retornoApiEstado = {
 	sigla: string;
 	nome: string;
 };
+
 async function main() {
 	// criando tabela de telas
 	const telas = [
@@ -77,14 +79,14 @@ async function main() {
 			for (const cidade of cidades) {
 				// checar se cidade existe antes de inserir
 				const [cidadeExiste] = await db.query<Cidade[][]>(
-					`SELECT * FROM cidade:ibge${cidade.codigo_ibge}`
+					`SELECT * FROM cidade:id${cidade.codigo_ibge}`
 				);
 				if (cidadeExiste.length > 0) {
 					console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
 					continue;
 				}
 				const resultInsert = await db.insert('cidade', {
-					id: new RecordId('cidade', 'ibge' + cidade.codigo_ibge),
+					id: new RecordId('cidade', 'id' + cidade.codigo_ibge),
 					nome: cidade.nome,
 					estado: new RecordId('estado', estado.sigla),
 					codigoIbge: cidade.codigo_ibge
@@ -100,7 +102,7 @@ async function main() {
 
 			if (cidades.length > 0) {
 				db.merge(new RecordId('estado', estado.sigla), {
-					listaCidades: cidades.map((cidade) => new RecordId('cidade', 'ibge' + cidade.codigo_ibge))
+					listaCidades: cidades.map((cidade) => new RecordId('cidade', 'id' + cidade.codigo_ibge))
 				});
 			}
 			console.log('        cidades inseridas com sucesso');
