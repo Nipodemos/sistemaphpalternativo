@@ -1,17 +1,36 @@
 import type { LayoutServerLoad } from './$types';
-import { jsonify } from 'surrealdb.js';
-import db from '$lib/database/connection';
-import type { MenuLateral, Tela } from '$lib/types';
+import { jsonify } from 'surrealdb';
+import { initDb } from '$lib/database/connection';
+import type { Tela } from '$lib/database/types';
+
+interface MenuLateral {
+	[key: string]: Tela[];
+}
 
 export const load: LayoutServerLoad = async ({ fetch }) => {
+	const db = await initDb();
+	if (!db) {
+		return {
+			telas: [],
+			menus: {},
+			estados: []
+		};
+	}
+	const token = await db.signin({
+		username: 'root',
+		password: 'root'
+	});
+	console.log({ token });
 	const user = await db.info();
 	console.log({ user });
 	let telas: Tela[] = [];
 	if (!user) {
-		telas = await db.select<Tela>('tela').then(jsonify);
+		telas = jsonify(await db.select('tela'));
 	} else {
-		telas = await db.select<Tela>('tela').then(jsonify);
+		telas = jsonify(await db.select('tela'));
 	}
+
+	console.log({ telas });
 
 	const menus: MenuLateral = {};
 	telas.forEach((tela) => {
