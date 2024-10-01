@@ -7,6 +7,8 @@ interface MenuLateral {
 	[key: string]: Tela[];
 }
 
+type Jsonified<T> = Omit<T, 'id'> & { id: `${string}:${string}` };
+
 export const load: LayoutServerLoad = async ({ fetch }) => {
 	const db = await initDb();
 	if (!db) {
@@ -23,9 +25,9 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 	console.log({ token });
 	const user = await db.info();
 	console.log({ user });
-	let telas: Tela[] = [];
+	let telas: Jsonified<Tela>[] = [];
 	if (!user) {
-		telas = jsonify(await db.select('tela'));
+		telas = jsonify(await db.select<Tela>('tela'));
 	} else {
 		telas = jsonify(await db.select('tela'));
 	}
