@@ -1,8 +1,8 @@
-import type { RecordId } from 'surrealdb.js';
+import type { RecordId } from 'surrealdb';
 
 export interface BaseTabela {
-	id: RecordId | string;
-	[key: string]: unknown;
+	id: RecordId;
+	[x: string]: unknown;
 	criadoEm: Date;
 	atualizadoEm: Date;
 	canceladoEm: Date | null;
