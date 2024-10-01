@@ -198,7 +198,7 @@ DEFINE FIELD cpfcnpj							ON cliente TYPE string ASSERT string::len($value) == 
 DEFINE FIELD pessoa								ON cliente TYPE string ASSERT string::contains($value, "F") || string::contains($value, "J");
 DEFINE FIELD nascimento						ON cliente TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD inscricaoEstadual		ON cliente TYPE string | null ASSERT string::len($value) < 20 || $value == null DEFAULT null;
-DEFINE FIELD enderecoCompleto			ON cliente TYPE record<enderecoCompleto> || null DEFAULT null;
+DEFINE FIELD enderecoCompleto			ON cliente TYPE record<enderecoCompleto | null> DEFAULT null;
 DEFINE FIELD telefone1						ON cliente TYPE string ASSERT string::len($value) == 16 || string::len($value) == 14;
 DEFINE FIELD telefone2						ON cliente TYPE string | null ASSERT type::is::null($value) || string::len($value) == 16 || string::len($value) == 14 DEFAULT null;
 DEFINE FIELD email								ON cliente TYPE string | null ASSERT type::is::null($value) || string::is::email($value);
@@ -216,7 +216,7 @@ DEFINE FIELD cpfcnpj							ON funcionario TYPE string ASSERT string::len($value)
 DEFINE FIELD pessoa								ON funcionario TYPE string ASSERT $value INSIDE ['F','J'];
 DEFINE FIELD inscricaoEstadual		ON funcionario TYPE string ASSERT string::len($value) < 20;
 DEFINE FIELD nascimento						ON funcionario TYPE datetime ASSERT type::is::datetime(type::datetime($value));
-DEFINE FIELD enderecoCompleto			ON funcionario TYPE record<enderecoCompleto> || null DEFAULT null;
+DEFINE FIELD enderecoCompleto			ON funcionario TYPE record<enderecoCompleto | null> DEFAULT null;
 DEFINE FIELD telefone1						ON funcionario TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD telefone2						ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD email								ON funcionario TYPE string | null DEFAULT null;
@@ -289,8 +289,8 @@ DEFINE TABLE usuario TYPE NORMAL SCHEMAFULL PERMISSIONS FOR SELECT,CREATE,UPDATE
 
 DEFINE FIELD email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
 DEFINE FIELD empresa 							ON usuario TYPE record<empresa> ;
-DEFINE FIELD funcionario 					ON usuario TYPE record<funcionario> ;
-DEFINE FIELD login								ON usuario TYPE string && string::len($value) > 2;
+DEFINE FIELD funcionario 					ON usuario TYPE record<funcionario>;
+DEFINE FIELD login								ON usuario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
 DEFINE FIELD criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
