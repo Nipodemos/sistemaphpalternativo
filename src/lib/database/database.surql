@@ -28,13 +28,13 @@ DEFINE TABLE enderecoCompleto SCHEMAFULL TYPE NORMAL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
-DEFINE FIELD dono									ON enderecoCompleto TYPE record | null DEFAULT NULL;
+DEFINE FIELD dono									ON enderecoCompleto TYPE record<dono> ASSERT $value != null;
 DEFINE FIELD rua									ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD numero								ON enderecoCompleto TYPE number ASSERT $value > 0;
 DEFINE FIELD complemento					ON enderecoCompleto TYPE string | null DEFAULT null;
 DEFINE FIELD bairro								ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD cidade								ON enderecoCompleto TYPE record<cidade> ASSERT $value != NONE;
-DEFINE FIELD estado								ON enderecoCompleto TYPE record<estado> ASSERT $value != NONE;
+DEFINE FIELD cidade								ON enderecoCompleto TYPE record<cidade> ASSERT $value != null;
+DEFINE FIELD estado								ON enderecoCompleto TYPE record<estado> ASSERT $value != null;
 DEFINE FIELD cep									ON enderecoCompleto TYPE string ASSERT string::len($value) == 8;
 DEFINE FIELD criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
