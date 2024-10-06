@@ -1,3 +1,19 @@
+
+DEFINE ACCESS conta_usuario ON DATABASE TYPE RECORD
+	SIGNUP (
+		CREATE usuario SET
+			email = $email,
+			empresa = $empresa,
+			funcionario = $funcionado,
+			login = $login,
+			senha = crypto::argon2::generate($senha),
+	)
+	SIGNIN (
+		SELECT * FROM usuario WHERE (email = $email || login = $email ) AND crypto::argon2::compare(senha, $senha)
+	)
+	DURATION FOR TOKEN 10h, FOR SESSION 10h
+
+
 DEFINE TABLE estado SCHEMAFULL CHANGEFEED 30d
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
