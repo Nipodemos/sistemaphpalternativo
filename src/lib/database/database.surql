@@ -9,7 +9,7 @@ DEFINE ACCESS conta_usuario ON DATABASE TYPE RECORD
 			senha = crypto::argon2::generate($senha),
 	)
 	SIGNIN (
-		SELECT * FROM usuario WHERE (email = $email || login = $email ) AND crypto::argon2::compare(senha, $senha)
+		SELECT * FROM usuario WHERE (email = $login || login = $login ) AND crypto::argon2::compare(senha, $senha)
 	)
 	DURATION FOR TOKEN 10h, FOR SESSION 10h
 

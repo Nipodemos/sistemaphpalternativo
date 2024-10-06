@@ -4,7 +4,11 @@
 	import { AppBar } from '@skeletonlabs/skeleton';
 	import type { AfterNavigate } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
+
+	import { page } from '$app/stores';
 	import MenuLateral from '../componentes/menu_lateral.svelte';
+
+	const url = $page.url.pathname;
 	export let data;
 	let menus = data.menus;
 
@@ -25,7 +29,12 @@
 			<svelte:fragment slot="trail">(actions)</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
-	<svelte:fragment slot="sidebarLeft"><MenuLateral {menus} /></svelte:fragment>
+
+	<svelte:fragment slot="sidebarLeft">
+		{#if url !== '/login'}
+			<MenuLateral {menus} />
+		{/if}
+	</svelte:fragment>
 	<!-- (sidebarRight) -->
 	<!-- (pageHeader) -->
 	<!-- Router Slot -->
