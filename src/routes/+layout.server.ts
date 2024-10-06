@@ -1,13 +1,11 @@
 import type { LayoutServerLoad } from './$types';
-import { jsonify } from 'surrealdb';
+import { jsonify, type Jsonify } from 'surrealdb';
 import { initDb } from '$lib/database/connection';
 import type { Tela } from '$lib/database/types';
 
 interface MenuLateral {
 	[key: string]: Tela[];
 }
-
-type Jsonified<T> = Omit<T, 'id'> & { id: `${string}:${string}` };
 
 export const load: LayoutServerLoad = async ({ fetch }) => {
 	const db = await initDb();
@@ -25,11 +23,10 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 	console.log({ token });
 	const user = await db.info();
 	console.log({ user });
-	let telas: Jsonified<Tela>[] = [];
-	if (!user) {
-		telas = jsonify(await db.select<Tela>('tela'));
+	let telas: Jsonify<Tela>[] = [];
+		telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
 	} else {
-		telas = jsonify(await db.select('tela'));
+		telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
 	}
 
 	console.log({ telas });
