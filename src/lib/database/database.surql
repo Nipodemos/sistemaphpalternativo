@@ -42,7 +42,8 @@ DEFINE INDEX codigoIbge 					ON cidade FIELDS codigoIbge UNIQUE;
 
 DEFINE TABLE enderecoCompleto SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD dono									ON enderecoCompleto TYPE record;
 DEFINE FIELD rua									ON enderecoCompleto TYPE string ASSERT string::len($value) > 2;
@@ -52,12 +53,12 @@ DEFINE FIELD bairro								ON enderecoCompleto TYPE string ASSERT string::len($v
 DEFINE FIELD cidade								ON enderecoCompleto TYPE record<cidade>;
 DEFINE FIELD estado								ON enderecoCompleto TYPE record<estado>;
 DEFINE FIELD cep									ON enderecoCompleto TYPE string ASSERT string::len($value) == 8;
+DEFINE FIELD lojista 							ON enderecoCompleto TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE' THEN {
-    let $ids = SELECT value id FROM enderecoCompleto where dono == $after.dono;
     UPDATE $after.dono SET enderecos = (
         SELECT value id FROM enderecoCompleto where dono = $after.dono
     )
@@ -66,7 +67,8 @@ DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE'
 
 define table fornecedor schemafull
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD nome									ON fornecedor TYPE string ASSERT string::len($value) > 1 && string::len($value) < 256;
 DEFINE FIELD fantasia							ON fornecedor TYPE string ASSERT string::len($value) > 1 && string::len($value) < 256;
@@ -87,6 +89,7 @@ DEFINE FIELD responsavelEmail			ON fornecedor TYPE string | null DEFAULT null AS
 DEFINE FIELD responsavelTelefone	ON fornecedor TYPE string | null DEFAULT null;
 DEFINE FIELD parceiro							ON fornecedor TYPE bool DEFAULT false;
 DEFINE FIELD site									ON fornecedor TYPE string | null DEFAULT null;
+DEFINE FIELD lojista 							ON fornecedor TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON fornecedor TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON fornecedor TYPE datetime| null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON fornecedor TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -95,11 +98,13 @@ DEFINE INDEX cpfcnpj_index				ON fornecedor FIELDS cpfcnpj UNIQUE;
 
 DEFINE TABLE produtoCategoria SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD tabela								ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD grupo								ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD subgrupo							ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD lojista 							ON produtoCategoria TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON produtoCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON produtoCategoria TYPE datetime| null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON produtoCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -107,7 +112,9 @@ DEFINE FIELD comissao							ON produtoCategoria TYPE number ASSERT $value >= 0 &
 
 DEFINE TABLE produto SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD fornecedor						ON produto TYPE record<fornecedor> ;
 DEFINE FIELD descricao						ON produto TYPE string ASSERT string::len($value) > 2;
@@ -129,6 +136,8 @@ DEFINE FIELD codigo								ON produto TYPE number READONLY DEFAULT {
 	LET $max_codigo = (select value codigo from produto order by codigo desc limit 1)[0] || 0;
 	RETURN $max_codigo+1;
 };
+DEFINE FIELD grade								ON produto TYPE array<record<produtoGrade>> DEFAULT [];
+DEFINE FIELD lojista 							ON produto TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON produto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON produto TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON produto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -139,9 +148,12 @@ DEFINE INDEX descricao_index 			ON produto FIELDS descricao UNIQUE;
 
 DEFINE TABLE acabamento SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD descricao						ON acabamento TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD lojista 							ON acabamento TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON acabamento TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON acabamento TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON acabamento TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -155,9 +167,12 @@ DEFINE INDEX codigo_index					ON acabamento FIELDS codigo UNIQUE;
 
 DEFINE TABLE cor SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD descricao						ON cor TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD lojista 							ON cor TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON cor TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON cor TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON cor TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -171,12 +186,15 @@ DEFINE INDEX codigo_index					ON cor FIELDS codigo UNIQUE;
 
 DEFINE TABLE produtoGrade SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD produto							ON produtoGrade TYPE record<produto> ;
 DEFINE FIELD cor									ON produtoGrade TYPE record<cor> ;
 DEFINE FIELD acabamento						ON produtoGrade TYPE record<acabamento> | null;
 DEFINE FIELD ativo								ON produtoGrade TYPE bool DEFAULT true;
+DEFINE FIELD lojista 							ON produtoGrade TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON produtoGrade TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON produtoGrade TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON produtoGrade TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -185,7 +203,9 @@ DEFINE INDEX produtoGrade_index 	ON produtoGrade FIELDS produto,cor,acabamento U
 
 DEFINE TABLE empresa SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD nome									ON empresa TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD codigo								ON cor TYPE number READONLY DEFAULT {
@@ -199,6 +219,7 @@ DEFINE FIELD enderecoCompleto			ON empresa TYPE record<enderecoCompleto> ;
 DEFINE FIELD telefone1						ON empresa TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD telefone2						ON empresa TYPE string | null DEFAULT null;
 DEFINE FIELD email								ON empresa TYPE string | null ASSERT $value == null || string::is::email($value) DEFAULT null;
+DEFINE FIELD lojista 							ON empresa TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON empresa TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON empresa TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON empresa TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -206,7 +227,9 @@ DEFINE FIELD atualizadoEm					ON empresa TYPE datetime VALUE time::now() DEFAULT
 
 DEFINE TABLE cliente SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD nome									ON cliente TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD fantasia							ON cliente TYPE string ASSERT string::len($value) > 2 || $value == null DEFAULT null;
@@ -218,6 +241,7 @@ DEFINE FIELD enderecoCompleto			ON cliente TYPE record<enderecoCompleto | null> 
 DEFINE FIELD telefone1						ON cliente TYPE string ASSERT string::len($value) == 16 || string::len($value) == 14;
 DEFINE FIELD telefone2						ON cliente TYPE string | null ASSERT type::is::null($value) || string::len($value) == 16 || string::len($value) == 14 DEFAULT null;
 DEFINE FIELD email								ON cliente TYPE string | null ASSERT type::is::null($value) || string::is::email($value);
+DEFINE FIELD lojista 							ON cliente TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON cliente TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON cliente TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON cliente TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -225,7 +249,9 @@ DEFINE FIELD atualizadoEm					ON cliente TYPE datetime VALUE time::now() DEFAULT
 
 DEFINE TABLE funcionario SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD nome									ON funcionario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD cpfcnpj							ON funcionario TYPE string ASSERT string::len($value) == 14;
@@ -240,6 +266,7 @@ DEFINE FIELD apelido							ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD comissao							ON funcionario TYPE number ASSERT $value >= 0 && $value <= 100;
 DEFINE FIELD admitidoEm						ON funcionario TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD demitidoEm						ON funcionario TYPE datetime;
+DEFINE FIELD lojista 							ON funcionario TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON funcionario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON funcionario TYPE datetime;
 DEFINE FIELD atualizadoEm					ON funcionario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -247,7 +274,9 @@ DEFINE FIELD atualizadoEm					ON funcionario TYPE datetime VALUE time::now() DEF
 
 DEFINE TABLE pedidoVenda SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD empresa							ON pedidoVenda TYPE record<empresa> ;
 DEFINE FIELD cliente							ON pedidoVenda TYPE record<cliente> ;
@@ -256,6 +285,7 @@ DEFINE FIELD funcionario					ON pedidoVenda TYPE record<funcionario> ;
 DEFINE FIELD dataPedido						ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD dataEntrega					ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD observacao						ON pedidoVenda TYPE string;
+DEFINE FIELD lojista 							ON pedidoVenda TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON pedidoVenda TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON pedidoVenda TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON pedidoVenda TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -263,11 +293,14 @@ DEFINE FIELD atualizadoEm					ON pedidoVenda TYPE datetime VALUE time::now() DEF
 
 DEFINE TABLE crmCategoria SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD descricao						ON crmCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD corTexto							ON crmCategoria TYPE record<cor> ;
 DEFINE FIELD corFundo							ON crmCategoria TYPE record<cor> ;
+DEFINE FIELD lojista 							ON crmCategoria TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON crmCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm					ON crmCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON crmCategoria TYPE datetime | null DEFAULT null;
@@ -275,7 +308,9 @@ DEFINE FIELD canceladoEm					ON crmCategoria TYPE datetime | null DEFAULT null;
 
 DEFINE TABLE crm SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD empresa							ON crm TYPE record<empresa> ;
 DEFINE FIELD cliente							ON crm TYPE record<cliente> ;
@@ -283,6 +318,7 @@ DEFINE FIELD categoria						ON crm TYPE record<crmCategoria> ;
 DEFINE FIELD funcionario					ON crm TYPE record<funcionario> ;
 DEFINE FIELD dataAgendada					ON crm TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD dataRealizada				ON crm TYPE datetime;
+DEFINE FIELD lojista 							ON crm TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON crm TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON crm TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -290,23 +326,31 @@ DEFINE FIELD atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT tim
 
 DEFINE TABLE crmObservacoes SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD crm									ON crmObservacoes TYPE record<crm> ;
 DEFINE FIELD descricao						ON crmObservacoes TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD categoriaAntes				ON crmObservacoes TYPE record<crmCategoria>;
 DEFINE FIELD categoriaDepois			ON crmObservacoes TYPE record<crmCategoria>;
+DEFINE FIELD lojista 							ON crmObservacoes TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm							ON crmObservacoes TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm					ON crmObservacoes TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm					ON crmObservacoes TYPE datetime | null DEFAULT null;
 
 
 DEFINE TABLE usuario SCHEMAFULL 
+PERMISSIONS
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 
 DEFINE FIELD email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
 DEFINE FIELD empresa 							ON usuario TYPE record<empresa> ;
 DEFINE FIELD funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD login								ON usuario TYPE string ASSERT string::len($value) > 2;
+DEFINE FIELD lojista 							ON usuario TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
 DEFINE FIELD criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -316,7 +360,8 @@ DEFINE INDEX login_unico ON usuario FIELDS login UNIQUE;
 
 DEFINE TABLE tela SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT FULL
+		FOR CREATE, UPDATE, DELETE NONE
 ;
 DEFINE FIELD menu									ON tela TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD submenu							ON tela TYPE string ASSERT string::len($value) >= 2;
@@ -330,11 +375,14 @@ DEFINE INDEX submenu_unico ON tela FIELDS submenu UNIQUE;
 
 DEFINE TABLE permissaoTela SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE
+			WHERE lojista = $auth.lojista
+		FOR DELETE NONE
 ;
 DEFINE FIELD usuario							ON permissaoTela TYPE record<usuario> ;
 DEFINE FIELD tela									ON permissaoTela TYPE record<tela> ;
 DEFINE FIELD permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
+DEFINE FIELD lojista 							ON permissaoTela TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON permissaoTela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm 					ON permissaoTela TYPE datetime | null DEFAULT null;
