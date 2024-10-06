@@ -26,3 +26,10 @@ export interface Tela extends BaseTabela {
 	icone: string;
 	url: string;
 }
+
+export interface PermissaoTela extends BaseTabela {
+	usuario: RecordId<'usuario'>;
+	tela: RecordId<'tela'>;
+	permissao: 'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio';
+	lojista: string;
+}

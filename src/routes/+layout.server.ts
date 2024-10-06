@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { jsonify, type Jsonify } from 'surrealdb';
 import { initDb } from '$lib/database/connection';
-import type { Tela } from '$lib/database/types';
+import type { PermissaoTela, Tela } from '$lib/database/types';
 
 interface MenuLateral {
 	[key: string]: Tela[];
@@ -24,6 +24,17 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 	const user = await db.info();
 	console.log({ user });
 	let telas: Jsonify<Tela>[] = [];
+
+	if (user) {
+		const permissoes = db.query<PermissaoTela[]>(`
+			SELECT * FROM permissaoTela 
+			WHERE 
+				usuario.id = $auth.id AND
+				lojista = $auth.lojista AND
+				permissao = 'visualizar'
+			fetch tela,usuario 
+		`);
+		console.log({ permissoes });
 		telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
 	} else {
 		telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
