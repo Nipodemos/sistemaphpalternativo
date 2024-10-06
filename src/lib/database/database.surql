@@ -1,4 +1,4 @@
-DEFINE TABLE estado SCHEMAFULL TYPE NORMAL
+DEFINE TABLE estado SCHEMAFULL CHANGEFEED 30d
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -11,7 +11,7 @@ DEFINE FIELD atualizadoEm 				ON estado TYPE datetime VALUE time::now() DEFAULT 
 
 DEFINE INDEX uf_unico ON estado FIELDS sigla UNIQUE;
 
-DEFINE TABLE cidade SCHEMAFULL TYPE NORMAL
+DEFINE TABLE cidade SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -24,7 +24,7 @@ DEFINE FIELD atualizadoEm 				ON cidade TYPE datetime VALUE time::now() DEFAULT 
 
 DEFINE INDEX codigoIbge 					ON cidade FIELDS codigoIbge UNIQUE;
 
-DEFINE TABLE enderecoCompleto SCHEMAFULL TYPE NORMAL
+DEFINE TABLE enderecoCompleto SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -48,7 +48,7 @@ DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE'
 };
 
 
-define table fornecedor schemafull TYPE NORMAL
+define table fornecedor schemafull
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -77,7 +77,7 @@ DEFINE FIELD atualizadoEm					ON fornecedor TYPE datetime VALUE time::now() DEFA
 DEFINE INDEX codigo_index					ON fornecedor FIELDS codigo UNIQUE;
 DEFINE INDEX cpfcnpj_index				ON fornecedor FIELDS cpfcnpj UNIQUE;
 
-DEFINE TABLE produtoCategoria SCHEMAFULL TYPE NORMAL
+DEFINE TABLE produtoCategoria SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -89,7 +89,7 @@ DEFINE FIELD canceladoEm					ON produtoCategoria TYPE datetime| null DEFAULT nul
 DEFINE FIELD atualizadoEm					ON produtoCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD comissao							ON produtoCategoria TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
 
-DEFINE TABLE produto SCHEMAFULL TYPE NORMAL
+DEFINE TABLE produto SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -121,7 +121,7 @@ DEFINE INDEX codigoDisplay_index	ON produto FIELDS codigoDisplay UNIQUE;
 DEFINE INDEX descricao_index 			ON produto FIELDS descricao UNIQUE;
 
 
-DEFINE TABLE acabamento SCHEMAFULL TYPE NORMAL
+DEFINE TABLE acabamento SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -137,7 +137,7 @@ DEFINE INDEX descricao_index 			ON acabamento FIELDS descricao UNIQUE;
 DEFINE INDEX codigo_index					ON acabamento FIELDS codigo UNIQUE;
 
 
-DEFINE TABLE cor SCHEMAFULL TYPE NORMAL
+DEFINE TABLE cor SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -153,7 +153,7 @@ DEFINE INDEX descricao_index 			ON cor FIELDS descricao UNIQUE;
 DEFINE INDEX codigo_index					ON cor FIELDS codigo UNIQUE;
 
 
-DEFINE TABLE produtoGrade SCHEMAFULL TYPE NORMAL
+DEFINE TABLE produtoGrade SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -167,7 +167,7 @@ DEFINE FIELD atualizadoEm					ON produtoGrade TYPE datetime VALUE time::now() DE
 DEFINE INDEX produtoGrade_index 	ON produtoGrade FIELDS produto,cor,acabamento UNIQUE;
 
 
-DEFINE TABLE empresa SCHEMAFULL TYPE NORMAL
+DEFINE TABLE empresa SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -188,7 +188,7 @@ DEFINE FIELD canceladoEm					ON empresa TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON empresa TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
-DEFINE TABLE cliente SCHEMAFULL TYPE NORMAL
+DEFINE TABLE cliente SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -207,7 +207,7 @@ DEFINE FIELD canceladoEm					ON cliente TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON cliente TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
-DEFINE TABLE funcionario SCHEMAFULL TYPE NORMAL
+DEFINE TABLE funcionario SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -229,7 +229,7 @@ DEFINE FIELD canceladoEm					ON funcionario TYPE datetime;
 DEFINE FIELD atualizadoEm					ON funcionario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
-DEFINE TABLE pedidoVenda SCHEMAFULL TYPE NORMAL
+DEFINE TABLE pedidoVenda SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -245,7 +245,7 @@ DEFINE FIELD canceladoEm					ON pedidoVenda TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON pedidoVenda TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
-DEFINE TABLE crmCategoria SCHEMAFULL TYPE NORMAL
+DEFINE TABLE crmCategoria SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -257,7 +257,7 @@ DEFINE FIELD atualizadoEm					ON crmCategoria TYPE datetime VALUE time::now() DE
 DEFINE FIELD canceladoEm					ON crmCategoria TYPE datetime | null DEFAULT null;
 
 
-DEFINE TABLE crm SCHEMAFULL TYPE NORMAL
+DEFINE TABLE crm SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -272,7 +272,7 @@ DEFINE FIELD canceladoEm					ON crm TYPE datetime | null DEFAULT null;
 DEFINE FIELD atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
 
-DEFINE TABLE crmObservacoes SCHEMAFULL TYPE NORMAL
+DEFINE TABLE crmObservacoes SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -285,7 +285,7 @@ DEFINE FIELD atualizadoEm					ON crmObservacoes TYPE datetime VALUE time::now() 
 DEFINE FIELD canceladoEm					ON crmObservacoes TYPE datetime | null DEFAULT null;
 
 
-DEFINE TABLE usuario TYPE NORMAL SCHEMAFULL PERMISSIONS FOR SELECT,CREATE,UPDATE,DELETE FULL;
+DEFINE TABLE usuario SCHEMAFULL 
 
 DEFINE FIELD email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
 DEFINE FIELD empresa 							ON usuario TYPE record<empresa> ;
@@ -298,7 +298,7 @@ DEFINE FIELD canceladoEm 					ON usuario TYPE datetime | null DEFAULT null;
 
 DEFINE INDEX login_unico ON usuario FIELDS login UNIQUE;
 
-DEFINE TABLE tela SCHEMAFULL TYPE NORMAL
+DEFINE TABLE tela SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
@@ -312,7 +312,7 @@ DEFINE FIELD canceladoEm 					ON tela TYPE datetime | null DEFAULT null;
 
 DEFINE INDEX submenu_unico ON tela FIELDS submenu UNIQUE;
 
-DEFINE TABLE permissaoTela SCHEMAFULL TYPE NORMAL
+DEFINE TABLE permissaoTela SCHEMAFULL
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE,DELETE FULL
 ;
