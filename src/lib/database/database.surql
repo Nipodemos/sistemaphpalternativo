@@ -43,7 +43,7 @@ DEFINE INDEX unicidadeestadocidade		ON cidade FIELDS nome,estado UNIQUE;
 
 DEFINE TABLE enderecoCompleto SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE dono									ON enderecoCompleto TYPE record;
@@ -54,7 +54,6 @@ DEFINE FIELD OVERWRITE bairro								ON enderecoCompleto TYPE string ASSERT stri
 DEFINE FIELD OVERWRITE cidade								ON enderecoCompleto TYPE record<cidade>;
 DEFINE FIELD OVERWRITE estado								ON enderecoCompleto TYPE record<estado>;
 DEFINE FIELD OVERWRITE cep									ON enderecoCompleto TYPE string ASSERT string::len($value) == 8;
-DEFINE FIELD OVERWRITE lojista 							ON enderecoCompleto TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm 						ON enderecoCompleto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -68,13 +67,13 @@ DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE'
 
 define table fornecedor schemafull
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE nome									ON fornecedor TYPE string ASSERT string::len($value) > 1 && string::len($value) < 256;
 DEFINE FIELD OVERWRITE fantasia							ON fornecedor TYPE string ASSERT string::len($value) > 1 && string::len($value) < 256;
 DEFINE FIELD OVERWRITE codigo								ON fornecedor TYPE int READONLY DEFAULT {
-		LET $max_codigo = ((select value codigo from fornecedor where lojista = $auth.lojista order by codigo desc limit 1)[0] || 0);
+		LET $max_codigo = ((select value codigo from fornecedor order by codigo desc limit 1)[0] || 0);
 		RETURN $max_codigo+1;
 };
 DEFINE FIELD OVERWRITE cpfcnpj							ON fornecedor TYPE string ASSERT	string::len($value) == 14 || string::len($value) == 18;
@@ -90,32 +89,29 @@ DEFINE FIELD OVERWRITE responsavelEmail			ON fornecedor TYPE string | null DEFAU
 DEFINE FIELD OVERWRITE responsavelTelefone	ON fornecedor TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE parceiro							ON fornecedor TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE site									ON fornecedor TYPE string | null DEFAULT null;
-DEFINE FIELD OVERWRITE lojista 							ON fornecedor TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON fornecedor TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON fornecedor TYPE datetime| null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON fornecedor TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE INDEX codigo_index					ON fornecedor FIELDS codigo,lojista UNIQUE;
-DEFINE INDEX cpfcnpj_index				ON fornecedor FIELDS cpfcnpj,lojista UNIQUE;
+DEFINE INDEX codigo_index					ON fornecedor FIELDS codigo UNIQUE;
+DEFINE INDEX cpfcnpj_index				ON fornecedor FIELDS cpfcnpj UNIQUE;
 
 DEFINE TABLE produtoCategoria SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE tabela								ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE grupo								ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE subgrupo							ON produtoCategoria TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD OVERWRITE lojista 							ON produtoCategoria TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON produtoCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON produtoCategoria TYPE datetime| null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON produtoCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE comissao							ON produtoCategoria TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
-DEFINE INDEX produtoCategoriaUnico ON produtoCategoria FIELDS tabela, grupo, subgrupo,lojista UNIQUE;
+DEFINE INDEX produtoCategoriaUnico ON produtoCategoria FIELDS tabela, grupo, subgrupo UNIQUE;
 
 DEFINE TABLE produto SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE fornecedor						ON produto TYPE record<fornecedor> ;
@@ -135,50 +131,45 @@ DEFINE FIELD OVERWRITE comissaoGerente			ON produto TYPE number ASSERT $value >=
 DEFINE FIELD OVERWRITE mix									ON produto TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE codigoBarra					ON produto TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE codigo								ON produto TYPE number READONLY DEFAULT {
-	LET $max_codigo = (select value codigo from produto where lojista = $auth.lojista order by codigo desc limit 1)[0] || 0;
+	LET $max_codigo = (select value codigo from produto order by codigo desc limit 1)[0] || 0;
 	RETURN $max_codigo+1;
 };
 DEFINE FIELD OVERWRITE grade								ON produto TYPE array<record<produtoGrade>> DEFAULT [];
-DEFINE FIELD OVERWRITE lojista 							ON produto TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON produto TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON produto TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON produto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE INDEX codigo_index					ON produto FIELDS codigo, lojista UNIQUE;
-DEFINE INDEX descricao_index 			ON produto FIELDS descricao, lojista UNIQUE;
+DEFINE INDEX codigo_index					ON produto FIELDS codigo UNIQUE;
+DEFINE INDEX descricao_index 			ON produto FIELDS descricao UNIQUE;
 
 
 DEFINE TABLE acabamento SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE descricao						ON acabamento TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD OVERWRITE lojista 							ON acabamento TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON acabamento TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON acabamento TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON acabamento TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE codigo								ON acabamento TYPE number READONLY DEFAULT {
-	LET $max_codigo = (select value codigo from acabamento where lojista = $auth.lojista order by codigo desc limit 1)[0] || 0;
+	LET $max_codigo = (select value codigo from acabamento order by codigo desc limit 1)[0] || 0;
 	RETURN $max_codigo+1;
 };
-DEFINE INDEX descricao_index 			ON acabamento FIELDS descricao,lojista UNIQUE;
-DEFINE INDEX codigo_index					ON acabamento FIELDS codigo,lojista UNIQUE;
+DEFINE INDEX descricao_index 			ON acabamento FIELDS descricao UNIQUE;
+DEFINE INDEX codigo_index					ON acabamento FIELDS codigo UNIQUE;
 
 
 DEFINE TABLE cor SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE descricao						ON cor TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD OVERWRITE lojista 							ON cor TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON cor TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON cor TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON cor TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE codigo								ON cor TYPE number READONLY DEFAULT {
-	LET $max_codigo = (select value codigo from cor where lojista = $auth.lojista order by codigo desc limit 1)[0] || 0;
+	LET $max_codigo = (select value codigo from cor order by codigo desc limit 1)[0] || 0;
 	RETURN $max_codigo+1;
 };
 DEFINE INDEX descricao_index 			ON cor FIELDS descricao UNIQUE;
@@ -187,15 +178,13 @@ DEFINE INDEX codigo_index					ON cor FIELDS codigo UNIQUE;
 
 DEFINE TABLE produtoGrade SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE NONE
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE produto							ON produtoGrade TYPE record<produto> ;
 DEFINE FIELD OVERWRITE cor									ON produtoGrade TYPE record<cor> ;
 DEFINE FIELD OVERWRITE acabamento						ON produtoGrade TYPE record<acabamento> | null;
 DEFINE FIELD OVERWRITE ativo								ON produtoGrade TYPE bool DEFAULT true;
-DEFINE FIELD OVERWRITE lojista 							ON produtoGrade TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON produtoGrade TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON produtoGrade TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON produtoGrade TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -204,13 +193,12 @@ DEFINE INDEX produtoGrade_index 	ON produtoGrade FIELDS produto,cor,acabamento U
 
 DEFINE TABLE empresa SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE NONE
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE nome									ON empresa TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE codigo								ON cor TYPE number READONLY DEFAULT {
-	LET $max_codigo = (select value codigo from cor where lojista = $auth.lojista order by codigo desc limit 1)[0] || 0;
+	LET $max_codigo = (select value codigo from cor order by codigo desc limit 1)[0] || 0;
 	RETURN $max_codigo+1;
 };
 DEFINE FIELD OVERWRITE fantasia							ON empresa TYPE string ASSERT string::len($value) > 2;
@@ -220,18 +208,16 @@ DEFINE FIELD OVERWRITE enderecoCompleto			ON empresa TYPE record<enderecoComplet
 DEFINE FIELD OVERWRITE telefone1						ON empresa TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD OVERWRITE telefone2						ON empresa TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON empresa TYPE string | null ASSERT $value == null || string::is::email($value) DEFAULT null;
-DEFINE FIELD OVERWRITE lojista 							ON empresa TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON empresa TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON empresa TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON empresa TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE INDEX codigo ON empresa FIELDS codigo, lojista UNIQUE;
-DEFINE INDEX cnpj 	ON empresa FIELDS cnpj, lojista UNIQUE;
+DEFINE INDEX codigo ON empresa FIELDS codigo UNIQUE;
+DEFINE INDEX cnpj 	ON empresa FIELDS cnpj UNIQUE;
 
 
 DEFINE TABLE cliente SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE nome									ON cliente TYPE string ASSERT string::len($value) > 2;
@@ -244,17 +230,15 @@ DEFINE FIELD OVERWRITE enderecoCompleto			ON cliente TYPE record<enderecoComplet
 DEFINE FIELD OVERWRITE telefone1						ON cliente TYPE string ASSERT string::len($value) == 16 || string::len($value) == 14;
 DEFINE FIELD OVERWRITE telefone2						ON cliente TYPE string | null ASSERT type::is::null($value) || string::len($value) == 16 || string::len($value) == 14 DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON cliente TYPE string | null ASSERT type::is::null($value) || string::is::email($value);
-DEFINE FIELD OVERWRITE lojista 							ON cliente TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON cliente TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON cliente TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON cliente TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE INDEX index_cpfcnpj 			ON produto FIELDS cpfcnpj, lojista UNIQUE;
+DEFINE INDEX index_cpfcnpj 			ON produto FIELDS cpfcnpj UNIQUE;
 
 
 DEFINE TABLE funcionario SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE nome									ON funcionario TYPE string ASSERT string::len($value) > 2;
@@ -269,16 +253,14 @@ DEFINE FIELD OVERWRITE apelido							ON funcionario TYPE string | null DEFAULT n
 DEFINE FIELD OVERWRITE comissao							ON funcionario TYPE number ASSERT $value >= 0 && $value <= 100;
 DEFINE FIELD OVERWRITE admitidoEm						ON funcionario TYPE datetime;
 DEFINE FIELD OVERWRITE demitidoEm						ON funcionario TYPE datetime | null DEFAULT null;
-DEFINE FIELD OVERWRITE lojista 							ON funcionario TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON funcionario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON funcionario TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON funcionario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE INDEX OVERWRITE index_cnpjcpf 			ON funcionario FIELDS cpfcnpj, lojista UNIQUE;
+DEFINE INDEX OVERWRITE index_cnpjcpf 			ON funcionario FIELDS cpfcnpj UNIQUE;
 
 DEFINE TABLE pedidoVenda SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE empresa							ON pedidoVenda TYPE record<empresa> ;
@@ -288,7 +270,6 @@ DEFINE FIELD OVERWRITE funcionario					ON pedidoVenda TYPE record<funcionario> ;
 DEFINE FIELD OVERWRITE dataPedido						ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD OVERWRITE dataEntrega					ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD OVERWRITE observacao						ON pedidoVenda TYPE string;
-DEFINE FIELD OVERWRITE lojista 							ON pedidoVenda TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON pedidoVenda TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON pedidoVenda TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON pedidoVenda TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -296,14 +277,12 @@ DEFINE FIELD OVERWRITE atualizadoEm					ON pedidoVenda TYPE datetime VALUE time:
 
 DEFINE TABLE crmCategoria SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE descricao						ON crmCategoria TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE corTexto							ON crmCategoria TYPE record<cor> ;
 DEFINE FIELD OVERWRITE corFundo							ON crmCategoria TYPE record<cor> ;
-DEFINE FIELD OVERWRITE lojista 							ON crmCategoria TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON crmCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm					ON crmCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON crmCategoria TYPE datetime | null DEFAULT null;
@@ -311,8 +290,7 @@ DEFINE FIELD OVERWRITE canceladoEm					ON crmCategoria TYPE datetime | null DEFA
 
 DEFINE TABLE crm SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE empresa							ON crm TYPE record<empresa> ;
@@ -321,7 +299,6 @@ DEFINE FIELD OVERWRITE categoria						ON crm TYPE record<crmCategoria> ;
 DEFINE FIELD OVERWRITE funcionario					ON crm TYPE record<funcionario> ;
 DEFINE FIELD OVERWRITE dataAgendada					ON crm TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD OVERWRITE dataRealizada				ON crm TYPE datetime;
-DEFINE FIELD OVERWRITE lojista 							ON crm TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON crm TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON crm TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON crm TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -329,15 +306,13 @@ DEFINE FIELD OVERWRITE atualizadoEm					ON crm TYPE datetime VALUE time::now() D
 
 DEFINE TABLE crmObservacoes SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE crm									ON crmObservacoes TYPE record<crm> ;
 DEFINE FIELD OVERWRITE descricao						ON crmObservacoes TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE categoriaAntes				ON crmObservacoes TYPE record<crmCategoria>;
 DEFINE FIELD OVERWRITE categoriaDepois			ON crmObservacoes TYPE record<crmCategoria>;
-DEFINE FIELD OVERWRITE lojista 							ON crmObservacoes TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm							ON crmObservacoes TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm					ON crmObservacoes TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON crmObservacoes TYPE datetime | null DEFAULT null;
@@ -345,15 +320,13 @@ DEFINE FIELD OVERWRITE canceladoEm					ON crmObservacoes TYPE datetime | null DE
 
 DEFINE TABLE usuario SCHEMAFULL 
 PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE;
 
 DEFINE FIELD OVERWRITE email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
 DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
 DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD OVERWRITE lojista 							ON usuario TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
 DEFINE FIELD OVERWRITE criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -378,19 +351,32 @@ DEFINE INDEX submenu_unico ON tela FIELDS submenu UNIQUE;
 
 DEFINE TABLE permissaoTela SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
-			WHERE lojista = $auth.lojista
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE usuario							ON permissaoTela TYPE record<usuario> ;
 DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela> ;
 DEFINE FIELD OVERWRITE permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
-DEFINE FIELD OVERWRITE lojista 							ON permissaoTela TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON permissaoTela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON permissaoTela TYPE datetime | null DEFAULT null;
 
 DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao UNIQUE;
+
+DEFINE TABLE movimentacaoEstoque SCHEMAFULL TYPE NORMAL
+	PERMISSIONS
+		FOR SELECT,CREATE,UPDATE,DELETE FULL
+;
+DEFINE FIELD produtoAcabamento		ON movimentacaoEstoque TYPE record<produtoAcabamento>;
+DEFINE FIELD quantidade						ON movimentacaoEstoque TYPE number ASSERT $value != 0;
+DEFINE FIELD tipoMovimento				ON movimentacaoEstoque TYPE string ASSERT $value INSIDE ['venda','compra','ajuste'];
+DEFINE FIELD estadoMovimento		 	ON movimentacaoEstoque TYPE string ASSERT $value INSIDE ['normal','encomendado','reservado','defeito'];
+DEFINE FIELD fonteMovimentacao 		ON movimentacaoEstoque TYPE record;
+DEFINE FIELD criadoEm 						ON movimentacaoEstoque TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD atualizadoEm 				ON movimentacaoEstoque TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
+DEFINE FIELD canceladoEm 					ON movimentacaoEstoque TYPE datetime | null DEFAULT null;
+
+
 
 
 
