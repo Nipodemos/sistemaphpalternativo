@@ -4,7 +4,7 @@
 	type MenuLateral = {
 		[key: string]: Tela[];
 	};
-	console.log('$page :>> ', $page);
+
 	let valueSingle = $page.route.id;
 	console.log('valueSingle :>> ', valueSingle);
 	export let menus: MenuLateral | undefined;
