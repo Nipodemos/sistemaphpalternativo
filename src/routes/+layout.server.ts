@@ -17,11 +17,11 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 			estados: []
 		};
 	}
-	if (url.pathname === '/login') {
+	if (url.pathname === '/') {
 		return {};
 	}
 	const token = cookies.get('tokenUsuario');
-	console.log('alan esteve aqui', token);
+	console.log('token dos cookies :>> ', token);
 	if (token) {
 		await db.authenticate(token);
 		const usuario = await db.info();
@@ -51,7 +51,7 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 			};
 		}
 	} else {
-		redirect(303, '/login');
+		redirect(303, '/');
 	}
 
 	// const token = await db.signin({
