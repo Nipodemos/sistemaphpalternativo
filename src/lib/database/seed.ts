@@ -1,6 +1,6 @@
-import {RecordId} from 'surrealdb.js';
-import db from './connection';
-import type {Cidade, Estado, Tela} from './types';
+import { RecordId } from 'surrealdb';
+import { initDb } from './connection';
+import type { Cidade, Estado, Tela } from './types';
 
 type retornoApiCidade = {
 	codigo_ibge: string;
@@ -13,6 +13,19 @@ type retornoApiEstado = {
 };
 
 async function main() {
+	const db = await initDb();
+	if (db === undefined) {
+		throw new Error('sem conexão com o banco de dados');
+	}
+	const token = await db.signin({
+		username: 'root',
+		password: 'root'
+	});
+
+	if (!token) {
+		throw new Error('nao consegiui logar');
+	}
+
 	// criando tabela de telas
 	const telas = [
 		{
