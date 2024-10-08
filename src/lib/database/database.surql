@@ -20,7 +20,10 @@ DEFINE TABLE estado SCHEMAFULL CHANGEFEED 30d
 ;
 DEFINE FIELD OVERWRITE nome									ON estado TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE sigla								ON estado TYPE string ASSERT string::len($value) == 2;
-DEFINE FIELD OVERWRITE listaCidades 				ON estado TYPE array<record<cidade>> DEFAULT [];
+DEFINE FIELD OVERWRITE cidades 							ON estado VALUE <future> {
+	let $estado = id;
+	RETURN (SELECT * FROM cidade WHERE estado = $estado)
+};
 DEFINE FIELD OVERWRITE criadoEm 						ON estado TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON estado TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON estado TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
@@ -67,7 +70,7 @@ DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE'
 
 define table fornecedor schemafull
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE
+		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE nome									ON fornecedor TYPE string ASSERT string::len($value) > 1 && string::len($value) < 256;
@@ -79,7 +82,10 @@ DEFINE FIELD OVERWRITE codigo								ON fornecedor TYPE int READONLY DEFAULT {
 DEFINE FIELD OVERWRITE cpfcnpj							ON fornecedor TYPE string ASSERT	string::len($value) == 14 || string::len($value) == 18;
 DEFINE FIELD OVERWRITE pessoa								ON fornecedor TYPE string ASSERT string::contains($value, "F") || string::contains($value, "J");
 DEFINE FIELD OVERWRITE inscricaoEstadual		ON fornecedor TYPE string | null DEFAULT null;
-DEFINE FIELD OVERWRITE enderecoCompleto			ON fornecedor TYPE record<enderecoCompleto> ;
+DEFINE FIELD OVERWRITE enderecoCompleto			ON fornecedor VALUE <future> {
+	let $fornecedor = id;
+	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $fornecedor)
+};
 DEFINE FIELD OVERWRITE telefone1						ON fornecedor TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD OVERWRITE telefone2						ON fornecedor TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON fornecedor TYPE string | null DEFAULT null ASSERT string::is::email($value) || $value == null;
@@ -204,7 +210,10 @@ DEFINE FIELD OVERWRITE codigo								ON cor TYPE number READONLY DEFAULT {
 DEFINE FIELD OVERWRITE fantasia							ON empresa TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE cnpj									ON empresa TYPE string ASSERT string::len($value) == 14;
 DEFINE FIELD OVERWRITE inscricaoEstadual		ON empresa TYPE string ASSERT string::len($value) < 20;
-DEFINE FIELD OVERWRITE enderecoCompleto			ON empresa TYPE record<enderecoCompleto> | null ;
+DEFINE FIELD OVERWRITE enderecoCompleto			ON empresa VALUE <future> {
+	let $empresa = id;
+	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $empresa)
+};
 DEFINE FIELD OVERWRITE telefone1						ON empresa TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD OVERWRITE telefone2						ON empresa TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON empresa TYPE string | null ASSERT $value == null || string::is::email($value) DEFAULT null;
@@ -226,7 +235,10 @@ DEFINE FIELD OVERWRITE cpfcnpj							ON cliente TYPE string ASSERT string::len($
 DEFINE FIELD OVERWRITE pessoa								ON cliente TYPE string ASSERT string::contains($value, "F") || string::contains($value, "J");
 DEFINE FIELD OVERWRITE nascimento						ON cliente TYPE datetime ASSERT type::is::datetime(type::datetime($value));
 DEFINE FIELD OVERWRITE inscricaoEstadual		ON cliente TYPE string | null ASSERT string::len($value) < 20 || $value == null DEFAULT null;
-DEFINE FIELD OVERWRITE enderecoCompleto			ON cliente TYPE record<enderecoCompleto> | null DEFAULT null;
+DEFINE FIELD OVERWRITE enderecoCompleto			ON cliente VALUE <future> {
+	let $cliente = id;
+	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $cliente)
+};
 DEFINE FIELD OVERWRITE telefone1						ON cliente TYPE string ASSERT string::len($value) == 16 || string::len($value) == 14;
 DEFINE FIELD OVERWRITE telefone2						ON cliente TYPE string | null ASSERT type::is::null($value) || string::len($value) == 16 || string::len($value) == 14 DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON cliente TYPE string | null ASSERT type::is::null($value) || string::is::email($value);
@@ -245,7 +257,10 @@ DEFINE FIELD OVERWRITE nome									ON funcionario TYPE string ASSERT string::le
 DEFINE FIELD OVERWRITE cpfcnpj							ON funcionario TYPE string ASSERT string::len($value) == 14;
 DEFINE FIELD OVERWRITE pessoa								ON funcionario TYPE string ASSERT $value INSIDE ['F','J'];
 DEFINE FIELD OVERWRITE nascimento						ON funcionario TYPE datetime;
-DEFINE FIELD OVERWRITE enderecoCompleto			ON funcionario TYPE record<enderecoCompleto> | null DEFAULT null;
+DEFINE FIELD OVERWRITE enderecoCompleto			ON funcionario VALUE <future> {
+	let $funcionario = id;
+	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $funcionario)
+};
 DEFINE FIELD OVERWRITE telefone1						ON funcionario TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD OVERWRITE telefone2						ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON funcionario TYPE string | null DEFAULT null;
