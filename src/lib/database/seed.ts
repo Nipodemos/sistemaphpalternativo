@@ -29,6 +29,13 @@ async function main() {
 	// criando tabela de telas
 	const telas = [
 		{
+			menu: 'teste',
+			submenu: 'teste',
+			url: 'teste/teste',
+			icone: 'fa-test',
+			id: 'nikxyow19pzzux69ta12'
+		},
+		{
 			menu: 'Clientes',
 			submenu: 'Cadastro de clientes',
 			id: 'cliente',
@@ -46,10 +53,9 @@ async function main() {
 
 	for (const tela of telas) {
 		console.log('tela: ', tela.submenu);
-		const [telaExiste] = await db.query<Tela[][]>(
-			`SELECT * FROM tela where id = tela:${tela.id} AND url = '${tela.url}'`
-		);
-		if (telaExiste.length === 0) {
+		const telaExiste: undefined | Tela = await db.select<Tela>(new RecordId('tela', tela.id));
+
+		if (!telaExiste) {
 			const resultInsert = await db.insert('tela', tela);
 			if (!resultInsert) {
 				throw new Error('    Erro ao inserir tela: ' + tela.submenu);
@@ -68,10 +74,13 @@ async function main() {
 	for (const estado of estados) {
 		console.log('estado.nome :>> ', estado.nome);
 
+		const estadoExiste: undefined | Estado = await db.select<Estado>(
+			new RecordId('estado', estado.sigla)
+		);
 		// checar se estado existe antes de inserir
-		const [estadoExiste] = await db.query<Estado[][]>(`SELECT * FROM estado:${estado.sigla}`);
+		// const [estadoExiste] = await db.query<Estado[][]>(`SELECT * FROM estado:${estado.sigla}`);
 
-		if (estadoExiste.length === 0) {
+		if (!estadoExiste) {
 			console.log('    estado não existe, inserindo');
 			const resultInsert = await db.insert('estado', {
 				id: estado.sigla,
@@ -82,46 +91,42 @@ async function main() {
 			if (!resultInsert) {
 				throw new Error('    Erro ao inserir estado');
 			}
-			const retornoCidades = await fetch(
-				`https://brasilapi.com.br/api/ibge/municipios/v1/${estado.sigla}?providers=dados-abertos-br,gov,wikipedia`
-			);
-
-			console.log('    inserindo cidades');
-			const cidades: retornoApiCidade[] = await retornoCidades.json();
-			console.log('        ' + cidades.length + ' cidades encontradas');
-			for (const cidade of cidades) {
-				// checar se cidade existe antes de inserir
-				const [cidadeExiste] = await db.query<Cidade[][]>(
-					`SELECT * FROM cidade:id${cidade.codigo_ibge}`
-				);
-				if (cidadeExiste.length > 0) {
-					console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
-					continue;
-				}
-				const resultInsert = await db.insert('cidade', {
-					id: new RecordId('cidade', 'id' + cidade.codigo_ibge),
-					nome: cidade.nome,
-					estado: new RecordId('estado', estado.sigla),
-					codigoIbge: cidade.codigo_ibge
-				});
-				if (!resultInsert) {
-					throw new Error('        Erro ao inserir cidade');
-				} else {
-					console.log(
-						'        cidade inserida com sucesso: ' + cidade.nome + ' - ' + cidade.codigo_ibge
-					);
-				}
-			}
-
-			if (cidades.length > 0) {
-				db.merge(new RecordId('estado', estado.sigla), {
-					listaCidades: cidades.map((cidade) => new RecordId('cidade', 'id' + cidade.codigo_ibge))
-				});
-			}
-			console.log('        cidades inseridas com sucesso');
 		} else {
 			console.log('    estado já existe');
+			continue;
 		}
+		const retornoCidades = await fetch(
+			`https://brasilapi.com.br/api/ibge/municipios/v1/${estado.sigla}?providers=dados-abertos-br,gov,wikipedia`
+		);
+
+		console.log('    inserindo cidades');
+		const cidades: retornoApiCidade[] = await retornoCidades.json();
+		console.log('        ' + cidades.length + ' cidades encontradas');
+		for (const cidade of cidades) {
+			const cidadeExiste: undefined | Cidade = await db.select<Cidade>(
+				new RecordId('cidade', 'id' + cidade.codigo_ibge)
+			);
+			// console.log('cidadeExiste :>> ', cidadeExiste);
+			// checar se cidade existe antes de inserir
+			if (cidadeExiste) {
+				console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
+				continue;
+			}
+			const resultInsert = await db.insert('cidade', {
+				id: new RecordId('cidade', 'id' + cidade.codigo_ibge),
+				nome: cidade.nome,
+				estado: new RecordId('estado', estado.sigla),
+				codigoIbge: cidade.codigo_ibge
+			});
+			if (!resultInsert) {
+				throw new Error('        Erro ao inserir cidade');
+			} else {
+				console.log(
+					'        cidade inserida com sucesso: ' + cidade.nome + ' - ' + cidade.codigo_ibge
+				);
+			}
+		}
+		console.log('        cidades inseridas com sucesso');
 	}
 	console.log('Estados inseridos com sucesso');
 }
