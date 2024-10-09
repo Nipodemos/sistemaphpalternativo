@@ -61,13 +61,6 @@ DEFINE FIELD OVERWRITE criadoEm 						ON enderecoCompleto TYPE datetime VALUE $b
 DEFINE FIELD OVERWRITE canceladoEm 					ON enderecoCompleto TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON enderecoCompleto TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 
-DEFINE EVENT enderecoadicionado ON TABLE enderecoCompleto WHEN $event = 'CREATE' THEN {
-    UPDATE $after.dono SET enderecos = (
-        SELECT value id FROM enderecoCompleto where dono = $after.dono
-    )
-};
-
-
 define table fornecedor schemafull
 	PERMISSIONS
 		FOR SELECT,CREATE,UPDATE FULL
@@ -112,7 +105,7 @@ DEFINE FIELD OVERWRITE subgrupo							ON produtoCategoria TYPE string ASSERT str
 DEFINE FIELD OVERWRITE criadoEm							ON produtoCategoria TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON produtoCategoria TYPE datetime| null DEFAULT null;
 DEFINE FIELD OVERWRITE atualizadoEm					ON produtoCategoria TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
-DEFINE FIELD OVERWRITE comissao							ON produtoCategoria TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
+DEFINE FIELD OVERWRITE comissao							ON produtoCategoria TYPE number ASSERT $value >= 0 && $value <= 1 DEFAULT 0;
 DEFINE INDEX produtoCategoriaUnico ON produtoCategoria FIELDS tabela, grupo, subgrupo UNIQUE;
 
 DEFINE TABLE produto SCHEMAFULL
@@ -131,9 +124,9 @@ DEFINE FIELD OVERWRITE precoVendaAprovar		ON produto TYPE number ASSERT $value >
 DEFINE FIELD OVERWRITE precoVendaAprovado		ON produto TYPE number ASSERT $value > 0;
 DEFINE FIELD OVERWRITE precoCustoAprovar		ON produto TYPE number ASSERT $value > 0;
 DEFINE FIELD OVERWRITE precoCustoAprovado		ON produto TYPE number ASSERT $value > 0;
-DEFINE FIELD OVERWRITE descontoMaximo				ON produto TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
-DEFINE FIELD OVERWRITE comissao							ON produto TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
-DEFINE FIELD OVERWRITE comissaoGerente			ON produto TYPE number ASSERT $value >= 0 && $value <= 100 DEFAULT 0;
+DEFINE FIELD OVERWRITE descontoMaximo				ON produto TYPE number ASSERT $value >= 0 && $value <= 1 DEFAULT 0;
+DEFINE FIELD OVERWRITE comissao							ON produto TYPE number ASSERT $value >= 0 && $value <= 1 DEFAULT 0;
+DEFINE FIELD OVERWRITE comissaoGerente			ON produto TYPE number ASSERT $value >= 0 && $value <= 1 DEFAULT 0;
 DEFINE FIELD OVERWRITE mix									ON produto TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE codigoBarra					ON produto TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE codigo								ON produto TYPE number READONLY DEFAULT {
@@ -265,7 +258,7 @@ DEFINE FIELD OVERWRITE telefone1						ON funcionario TYPE string ASSERT string::
 DEFINE FIELD OVERWRITE telefone2						ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE apelido							ON funcionario TYPE string | null DEFAULT null;
-DEFINE FIELD OVERWRITE comissao							ON funcionario TYPE number ASSERT $value >= 0 && $value <= 100;
+DEFINE FIELD OVERWRITE comissao							ON funcionario TYPE number ASSERT $value >= 0 && $value <= 1;
 DEFINE FIELD OVERWRITE admitidoEm						ON funcionario TYPE datetime;
 DEFINE FIELD OVERWRITE demitidoEm						ON funcionario TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE criadoEm							ON funcionario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
@@ -282,8 +275,8 @@ DEFINE FIELD OVERWRITE empresa							ON pedidoVenda TYPE record<empresa> ;
 DEFINE FIELD OVERWRITE cliente							ON pedidoVenda TYPE record<cliente> ;
 DEFINE FIELD OVERWRITE produtoGrade					ON pedidoVenda TYPE record<produtoGrade> ;
 DEFINE FIELD OVERWRITE funcionario					ON pedidoVenda TYPE record<funcionario> ;
-DEFINE FIELD OVERWRITE dataPedido						ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
-DEFINE FIELD OVERWRITE dataEntrega					ON pedidoVenda TYPE datetime ASSERT type::is::datetime(type::datetime($value));
+DEFINE FIELD OVERWRITE dataPedido						ON pedidoVenda TYPE datetime;
+DEFINE FIELD OVERWRITE dataEntrega					ON pedidoVenda TYPE datetime;
 DEFINE FIELD OVERWRITE observacao						ON pedidoVenda TYPE string;
 DEFINE FIELD OVERWRITE criadoEm							ON pedidoVenda TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm					ON pedidoVenda TYPE datetime | null DEFAULT null;
@@ -343,6 +336,7 @@ DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
 DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
+DEFINE FIELD OVERWRITE nivelPermissao				ON usuario TYPE number ASSERT $value > 0;
 DEFINE FIELD OVERWRITE criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON usuario TYPE datetime | null DEFAULT null;
@@ -351,8 +345,8 @@ DEFINE INDEX login_unico ON usuario FIELDS login UNIQUE;
 
 DEFINE TABLE tela SCHEMAFULL
 	PERMISSIONS
-		FOR SELECT FULL
-		FOR CREATE, UPDATE, DELETE NONE
+		FOR SELECT, UPDATE FULL
+		FOR CREATE, DELETE NONE
 ;
 DEFINE FIELD OVERWRITE menu									ON tela TYPE string ASSERT string::len($value) >= 2;
 DEFINE FIELD OVERWRITE submenu							ON tela TYPE string ASSERT string::len($value) >= 2;
@@ -380,13 +374,14 @@ DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao U
 
 DEFINE TABLE movimentacaoEstoque SCHEMAFULL TYPE NORMAL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE,DELETE FULL
+		FOR SELECT,CREATE,UPDATE FULL 
+		DELETE NONE
 ;
 DEFINE FIELD produtoAcabamento		ON movimentacaoEstoque TYPE record<produtoAcabamento>;
 DEFINE FIELD quantidade						ON movimentacaoEstoque TYPE number ASSERT $value != 0;
 DEFINE FIELD tipoMovimento				ON movimentacaoEstoque TYPE string ASSERT $value INSIDE ['venda','compra','ajuste'];
-DEFINE FIELD estadoMovimento		 	ON movimentacaoEstoque TYPE string ASSERT $value INSIDE ['normal','encomendado','reservado','defeito'];
-DEFINE FIELD fonteMovimentacao 		ON movimentacaoEstoque TYPE record;
+DEFINE FIELD statusMovimento		 	ON movimentacaoEstoque TYPE string ASSERT $value INSIDE ['ok','encomendado','reservado','defeito','pendente'];
+DEFINE FIELD pedido						 		ON movimentacaoEstoque TYPE record;
 DEFINE FIELD criadoEm 						ON movimentacaoEstoque TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD atualizadoEm 				ON movimentacaoEstoque TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD canceladoEm 					ON movimentacaoEstoque TYPE datetime | null DEFAULT null;
