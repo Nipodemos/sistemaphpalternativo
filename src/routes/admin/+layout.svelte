@@ -6,10 +6,10 @@
 	import { afterNavigate } from '$app/navigation';
 
 	import { page } from '$app/stores';
-	import MenuLateral from '../componentes/menu_lateral.svelte';
+	import MenuLateral from '../../componentes/menu_lateral.svelte';
 
 	const url = $page.url.pathname;
-	export let data;
+	export let data../$types.js;
 	let menus = data.menus;
 
 	afterNavigate((params: AfterNavigate) => {
