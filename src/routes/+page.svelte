@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { z } from 'zod';
 	export let data;
@@ -22,7 +23,7 @@
 
 			<label class="label mt-4">
 				<span>Senha</span>
-				<input class="input" type="password" name="password" bind:value={$form.senha} />
+				<input class="input" type="password" name="senha" bind:value={$form.senha} />
 			</label>
 			{#if $errors.senha}
 				{#each $errors.senha as erro}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '../app.css';
+	import '../../app.css';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { AppBar } from '@skeletonlabs/skeleton';
 	import type { AfterNavigate } from '@sveltejs/kit';
@@ -9,7 +9,7 @@
 	import MenuLateral from '../../componentes/menu_lateral.svelte';
 
 	const url = $page.url.pathname;
-	export let data../$types.js;
+	export let data;
 	let menus = data.menus;
 
 	afterNavigate((params: AfterNavigate) => {
