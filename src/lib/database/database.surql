@@ -332,11 +332,11 @@ PERMISSIONS
 		FOR DELETE NONE;
 
 DEFINE FIELD OVERWRITE email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
-DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
-DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
+//DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
+//DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
-DEFINE FIELD OVERWRITE nivelPermissao				ON usuario TYPE number ASSERT $value > 0;
+	DEFINE FIELD OVERWRITE nivelPermissao				ON usuario TYPE number ASSERT $value > 0;
 DEFINE FIELD OVERWRITE criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON usuario TYPE datetime | null DEFAULT null;
@@ -374,8 +374,8 @@ DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao U
 
 DEFINE TABLE movimentacaoEstoque SCHEMAFULL TYPE NORMAL
 	PERMISSIONS
-		FOR SELECT,CREATE,UPDATE FULL 
-		DELETE NONE
+		FOR SELECT,CREATE,UPDATE FULL
+		FOR DELETE NONE
 ;
 DEFINE FIELD produtoAcabamento		ON movimentacaoEstoque TYPE record<produtoAcabamento>;
 DEFINE FIELD quantidade						ON movimentacaoEstoque TYPE number ASSERT $value != 0;
