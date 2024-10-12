@@ -9,45 +9,44 @@ interface MenuLateral {
 }
 
 export const load: LayoutServerLoad = async ({ url, cookies }) => {
-	const db = await initDb();
-	if (!db) {
-		return {
-			telas: [],
-			menus: {},
-			estados: []
-		};
-	}
 	if (url.pathname === '/') {
 		return {};
 	}
 	const token = cookies.get('tokenUsuario');
 	console.log('token dos cookies :>> ', token);
 	if (token) {
+		const db = await initDb();
+		if (!db) {
+			return {
+				telas: [],
+				menus: {},
+				estados: []
+			};
+		}
 		await db.authenticate(token);
 		const usuario = await db.info();
 		console.log({ usuario });
 		if (usuario) {
-			const permissoes = await db.query<PermissaoTela[]>(`
+			const [permissoes] = await db.query<[PermissaoTela[]]>(`
 				SELECT tela FROM permissaoTela
 				WHERE
 					usuario.id = $auth.id AND
-					lojista = $auth.lojista AND
 					permissao = 'visualizar'
 				fetch tela,usuario
 			`);
-			console.log({ permissoes });
-			const telas = jsonify<PermissaoTela[]>(permissoes);
-			console.log({ telas });
+			console.log(permissoes[0]);
+
 			const menus: MenuLateral = {};
-			telas.forEach((tela) => {
+			permissoes.forEach((permissao) => {
+				let tela = permissao.tela;
 				if (!menus[tela.menu]) {
 					menus[tela.menu] = [];
 				}
+				tela = jsonify(tela);
 				menus[tela.menu].push(tela);
 			});
 			return {
-				menus,
-				usuario
+				menus
 			};
 		}
 	} else {

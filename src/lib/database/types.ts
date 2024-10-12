@@ -29,7 +29,7 @@ export interface Tela extends BaseTabela {
 
 export interface PermissaoTela extends BaseTabela {
 	usuario: RecordId<'usuario'>;
-	tela: RecordId<'tela'>;
+	tela: Tela;
 	permissao: 'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio';
 	lojista: string;
 }

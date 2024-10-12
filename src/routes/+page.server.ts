@@ -1,5 +1,5 @@
 import { initDb } from '$lib/database/connection';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { ResponseError } from 'surrealdb';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -10,7 +10,20 @@ const loginSchema = z.object({
 	senha: z.string().min(3, 'senha precisa ter pelo menos 3 caracteres')
 });
 
-export const load = async () => {
+export const load = async ({ cookies }) => {
+	const token = cookies.get('tokenUsuario');
+	console.log('token dos cookies :>> ', token);
+	if (token) {
+		const db = await initDb();
+		if (db) {
+			await db.authenticate(token);
+			const usuario = await db.info();
+			console.log({ usuario });
+			if (usuario) {
+				redirect(303, '/admin');
+			}
+		}
+	}
 	const form = await superValidate(zod(loginSchema));
 
 	return { form };

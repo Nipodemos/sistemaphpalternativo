@@ -1,10 +1,27 @@
 <script lang="ts">
 	import '../app.css';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { z } from 'zod';
+	import { goto } from '$app/navigation';
+	import { getToastStore } from '@skeletonlabs/skeleton';
 	export let data;
 
-	const { form, errors, enhance } = superForm(data.form);
+	const toastStore = getToastStore();
+
+	const { form, errors, enhance } = superForm(data.form, {
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
+				// Show success toast
+				toastStore.trigger({
+					message: 'Login realizado com sucesso!',
+					background: 'variant-filled-success'
+				});
+				// Redirect after a short delay
+				setTimeout(() => {
+					goto('/admin');
+				}, 750);
+			}
+		}
+	});
 </script>
 
 <div class="container h-full mx-auto flex justify-center items-center">

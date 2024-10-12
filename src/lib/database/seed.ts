@@ -26,33 +26,30 @@ async function main() {
 		throw new Error('nao consegiui logar');
 	}
 
+	return;
+
 	// criando tabela de telas
 	const telas = [
-		{
-			menu: 'teste',
-			submenu: 'teste',
-			url: 'teste/teste',
-			icone: 'fa-test',
-			id: 'nikxyow19pzzux69ta12'
-		},
 		{
 			menu: 'Clientes',
 			submenu: 'Cadastro de clientes',
 			id: 'cliente',
 			icone: 'fa fa-user',
-			url: '/cliente/listar_cliente'
+			url: 'admin//cliente/listar_cliente'
 		},
 		{
 			menu: 'CRM',
 			submenu: 'Agenda',
 			id: 'agenda',
 			icone: 'fa fa-calendar',
-			url: '/crm/listar_agenda'
+			url: 'admin//crm/listar_agenda'
 		}
 	];
 
 	for (const tela of telas) {
 		console.log('tela: ', tela.submenu);
+		// const resultado = await db.upsert(new RecordId('tela', tela.id), tela);
+		// console.log('resultado :>> ', resultado);
 		const telaExiste: undefined | Tela = await db.select<Tela>(new RecordId('tela', tela.id));
 
 		if (!telaExiste) {
@@ -65,6 +62,7 @@ async function main() {
 			console.log('    tela já existe: ' + tela.submenu);
 		}
 	}
+	return;
 
 	const retornoEstados = await fetch('https://brasilapi.com.br/api/ibge/uf/v1');
 
