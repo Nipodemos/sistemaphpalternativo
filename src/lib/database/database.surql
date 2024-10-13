@@ -331,7 +331,7 @@ PERMISSIONS
 		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE;
 
-DEFINE FIELD OVERWRITE email 								ON usuario TYPE string ASSERT string::is::email($value) || $value == NONE;
+DEFINE FIELD OVERWRITE email 								ON usuario TYPE string | null ASSERT string::is::email($value) || $value == null;
 //DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
 //DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
@@ -364,6 +364,8 @@ DEFINE TABLE permissaoTela SCHEMAFULL
 		FOR DELETE NONE
 ;
 DEFINE FIELD OVERWRITE usuario							ON permissaoTela TYPE record<usuario> ;
+REMOVE FIELD usuario ON permissaoTela;
+DEFINE FIELD OVERWRITE funcionario					ON permissaoTela TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela> ;
 DEFINE FIELD OVERWRITE permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
 DEFINE FIELD OVERWRITE criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
