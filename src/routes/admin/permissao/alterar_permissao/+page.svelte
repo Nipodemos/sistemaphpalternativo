@@ -1,11 +1,11 @@
 <script lang="ts">
 	export let data;
-	const permissoesUsuarios = data.permissoesUsuarios;
+	const permissoesPorFuncionario = data.permissoesPorFuncionario;
 </script>
 
 <div class="flex">
 	<div class="mb-8">
-		<h2 class="h2">Editar permissões</h2>
+		<h2 class="h2">Editar permissões da tela</h2>
 	</div>
 </div>
 

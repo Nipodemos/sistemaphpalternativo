@@ -1,26 +1,39 @@
-import { initDb } from '$lib/database/connection';
+import { getDb } from '$lib/database/connection';
+import type { Funcionario, PermissaoTela } from '$lib/database/types';
+import { jsonify, type Jsonify } from 'surrealdb';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	const db = await initDb();
-	if (db) {
-		let usuarios = await db.select('usuario');
-	}
+export const load: PageServerLoad = async ({ url }) => {
+	const telaID = url.searchParams.get('id');
+	if (!telaID) return { status: 404 };
+	const db = getDb();
+	//let array = db.query();
+
+	let funcionarios = await db.select<Funcionario>('funcionario');
+	funcionarios = jsonify<Funcionario[]>(funcionarios);
+	let permissoes = await db.select<PermissaoTela>('permissaoTela');
+	permissoes = jsonify<PermissaoTela[]>(permissoes);
+	const nomeDaTela = permissoes[0].tela.menu;
+	const permissoesPorFuncionario = unificarFuncionariosPermissoes(funcionarios, permissoes);
+	return { permissoesPorFuncionario, nomeDaTela };
 };
 
-const unificarDados = (usuarios: Usuario, permissoes) => {
-	return usuarios.map((usuario) => {
-		// Filtra as permissões do usuário atual
-		const permissoesUsuario = permissoes
-			.filter((p) => p.usuario === usuario.id)
-			.reduce((acc, p) => {
-				const tela = p.tela.replace('tela:', '');
-				if (!acc[tela]) acc[tela] = [];
-				acc[tela].push(p.permissao);
-				return acc;
+const unificarFuncionariosPermissoes = (
+	funcionarios: Jsonify<Funcionario[]>,
+	permissoes: Jsonify<PermissaoTela[]>
+) => {
+	return funcionarios.map((funcionario) => {
+		// Filtra as permissões do funcionário atual
+		const permissoesFuncionario = permissoes
+			.filter((permissao) => permissao.funcionario.id === funcionario.id)
+			.reduce((acumulado: { [key: string]: string[] }, permissao) => {
+				const nomeTela = permissao.tela.id as unknown as string;
+				if (!acumulado[nomeTela]) acumulado[nomeTela] = [];
+				acumulado[nomeTela].push(permissao.permissao);
+				return acumulado;
 			}, {});
 
-		// Adiciona as permissões ao objeto do usuário
-		return { ...usuario, permissoes: permissoesUsuario };
+		// Adiciona as permissões ao objeto do funcionário
+		return { ...funcionario, permissoes: permissoesFuncionario };
 	});
 };
