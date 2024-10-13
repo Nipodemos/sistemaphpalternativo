@@ -2,7 +2,14 @@ import { Surreal } from 'surrealdb';
 
 let db: Surreal | undefined;
 
-export async function initDb(): Promise<Surreal | undefined> {
+export class DatabaseConnectionError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'DatabaseConnectionError';
+	}
+}
+
+export async function initDb(): Promise<Surreal> {
 	if (db) return db;
 	db = new Surreal();
 	const tentativas = 3;
@@ -16,6 +23,7 @@ export async function initDb(): Promise<Surreal | undefined> {
 			console.error('Failed to connect to SurrealDB:', err);
 		}
 	}
+	throw new DatabaseConnectionError('Failed to connect to the database after multiple attempts');
 }
 
 export async function closeDb(): Promise<void> {
@@ -24,7 +32,9 @@ export async function closeDb(): Promise<void> {
 	db = undefined;
 }
 
-export function getDb(): Surreal | undefined {
+export function getDb(): Surreal {
+	if (!db) {
+		throw new DatabaseConnectionError('Database connection not initialized');
+	}
 	return db;
 }
-// highlight-end
