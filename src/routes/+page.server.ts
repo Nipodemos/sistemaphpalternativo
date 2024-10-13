@@ -15,11 +15,19 @@ export const load = async ({ cookies }) => {
 	console.log('token dos cookies :>> ', token);
 	if (token) {
 		const db = await initDb();
+		let autenticado = false;
 		if (db) {
-			await db.authenticate(token);
-			const usuario = await db.info();
-			console.log({ usuario });
-			if (usuario) {
+			try {
+				autenticado = await db.authenticate(token);
+			} catch (error) {
+				console.log('error :>> ', error);
+				if (error instanceof Error) {
+					console.log('error.message :>> ', error.message);
+					console.log('error.name :>> ', error.name);
+				}
+				console.log('token expirou ou deu erro');
+			}
+			if (autenticado) {
 				redirect(303, '/admin');
 			}
 		}
