@@ -26,8 +26,6 @@ async function main() {
 		throw new Error('nao consegiui logar');
 	}
 
-	return;
-
 	// criando tabela de telas
 	const telas = [
 		{
@@ -35,14 +33,42 @@ async function main() {
 			submenu: 'Cadastro de clientes',
 			id: 'cliente',
 			icone: 'fa fa-user',
-			url: 'admin//cliente/listar_cliente'
+			url: 'admin/cliente/listar_cliente'
 		},
 		{
 			menu: 'CRM',
 			submenu: 'Agenda',
 			id: 'agenda',
 			icone: 'fa fa-calendar',
-			url: 'admin//crm/listar_agenda'
+			url: 'admin/crm/listar_agenda'
+		},
+		{
+			menu: 'Tabelas básicas',
+			submenu: 'Cadastro de empresa',
+			id: 'empresa',
+			icone: 'fa fa-calendar',
+			url: 'admin/empresa/listar_empresa'
+		},
+		{
+			menu: 'Tabelas básicas',
+			submenu: 'Cadastro de funcionário',
+			id: 'funcionario',
+			icone: 'fa fa-calendar',
+			url: 'admin/funcionario/listar_funcionario'
+		},
+		{
+			menu: 'Usuários',
+			submenu: 'Cadastro de usuários',
+			id: 'usuario',
+			icone: 'fa fa-user',
+			url: 'admin/usuario/listar_usuario'
+		},
+		{
+			menu: 'Usuários',
+			submenu: 'Permissões de tela',
+			id: 'permissaoTela',
+			icone: 'fa fa-user',
+			url: 'admin/permissao/listar_permissao'
 		}
 	];
 
@@ -62,7 +88,6 @@ async function main() {
 			console.log('    tela já existe: ' + tela.submenu);
 		}
 	}
-	return;
 
 	const retornoEstados = await fetch('https://brasilapi.com.br/api/ibge/uf/v1');
 
