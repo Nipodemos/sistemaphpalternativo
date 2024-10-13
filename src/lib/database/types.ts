@@ -19,7 +19,7 @@ export interface Tela extends BaseTabela {
 export interface PermissaoTela extends BaseTabela {
 	funcionario: Funcionario;
 	tela: Tela;
-	permissao: 'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio';
+	permissoes: Array<'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio'>;
 	lojista: string;
 }
 
