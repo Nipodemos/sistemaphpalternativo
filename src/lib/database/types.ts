@@ -7,17 +7,6 @@ export interface BaseTabela {
 	atualizadoEm: Date;
 	canceladoEm: Date | null;
 }
-export interface Estado extends BaseTabela {
-	nome: string;
-	sigla: string;
-	listaCidades: Cidade[] | string[];
-}
-
-export interface Cidade extends BaseTabela {
-	nome: string;
-	estado: Estado | string;
-	codigoIbge: string;
-}
 
 export interface Tela extends BaseTabela {
 	menu: string;
@@ -28,8 +17,53 @@ export interface Tela extends BaseTabela {
 }
 
 export interface PermissaoTela extends BaseTabela {
-	usuario: RecordId<'usuario'>;
+	funcionario: Funcionario;
 	tela: Tela;
 	permissao: 'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio';
 	lojista: string;
+}
+
+export interface Funcionario extends BaseTabela {
+	nome: string;
+	cpfcnpj: string;
+	pessoa: string;
+	nascimento: Date;
+	enderecoCompleto: EnderecoCompleto;
+}
+
+export interface Estado extends BaseTabela {
+	nome: string;
+	sigla: string;
+	cidades: Cidade[];
+}
+export interface Cidade extends BaseTabela {
+	nome: string;
+	estado: Estado;
+	codigoIbge: string;
+}
+
+export interface Fornecedor extends BaseTabela {
+	// A FAZER
+	A_FAZER: string;
+}
+
+export interface Empresa extends BaseTabela {
+	// A FAZER
+	A_FAZER: string;
+}
+
+export interface Cliente extends BaseTabela {
+	// A FAZER
+	A_FAZER: string;
+}
+
+export interface EnderecoCompleto extends BaseTabela {
+	dono: Fornecedor | Empresa | Cliente | Funcionario;
+	rua: string;
+	numero: string;
+	complemento?: string;
+	bairro: string;
+	cidade: Cidade;
+	estado: Estado;
+	cep: string;
 }
