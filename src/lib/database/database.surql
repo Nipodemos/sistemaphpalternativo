@@ -254,6 +254,10 @@ DEFINE FIELD OVERWRITE enderecoCompleto			ON funcionario VALUE <future> {
 	let $funcionario = id;
 	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $funcionario)
 };
+DEFINE FIELD OVERWRITE permissoesTela 			ON funcionario VALUE <future> {
+	let $funcionario = id;
+	RETURN (SELECT * FROM permissaoTela WHERE funcionario = $funcionario)
+};
 DEFINE FIELD OVERWRITE telefone1						ON funcionario TYPE string ASSERT string::len($value) > 1;
 DEFINE FIELD OVERWRITE telefone2						ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE email								ON funcionario TYPE string | null DEFAULT null;
@@ -363,10 +367,10 @@ DEFINE TABLE permissaoTela SCHEMAFULL
 		FOR SELECT,CREATE,UPDATE FULL
 		FOR DELETE NONE
 ;
-DEFINE FIELD OVERWRITE usuario							ON permissaoTela TYPE record<usuario> ;
+//DEFINE FIELD OVERWRITE usuario							ON permissaoTela TYPE record<usuario>;
 REMOVE FIELD usuario ON permissaoTela;
 DEFINE FIELD OVERWRITE funcionario					ON permissaoTela TYPE record<funcionario>;
-DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela> ;
+DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela>;
 //DEFINE FIELD OVERWRITE permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
 REMOVE FIELD permissao ON permissaoTela;
 DEFINE FIELD OVERWRITE permissoes 					ON permissaoTela TYPE array<'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio'>;

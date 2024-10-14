@@ -29,6 +29,7 @@ export interface Funcionario extends BaseTabela {
 	pessoa: string;
 	nascimento: Date;
 	enderecoCompleto: EnderecoCompleto;
+	permissoesTela: PermissaoTela[];
 }
 
 export interface Estado extends BaseTabela {
