@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { Funcionario } from '$lib/database/types.js';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
-
+	import SuperDebug from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	export let data;
-	const funcionarios = data.funcionarios!;
+	const { form } = superForm(data.form);
+	// const funcionarios = data.funcionarios!;
 	const dadosDaTela = data.dadosDaTela!;
 	let permissoes = ['Visualizar', 'Inserir', 'Alterar', 'Excluir', 'Relatório'];
 	const temPermissao = (perm: string, func: Funcionario) => {
@@ -21,6 +23,7 @@
 	};
 </script>
 
+<SuperDebug data={$form} />
 <div class="flex">
 	<div class="mb-8">
 		<h3 class="h3">Editar permissões da tela de {dadosDaTela.submenu}</h3>
@@ -39,7 +42,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each funcionarios as funcionario}
+			<!-- {#each funcionarios as funcionario}
 				<tr>
 					<td>{funcionario.nome}</td>
 					{#each permissoes as p}
@@ -48,7 +51,7 @@
 						</td>
 					{/each}
 				</tr>
-			{/each}
+			{/each} -->
 		</tbody>
 	</table>
 </div>
