@@ -11,7 +11,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"surrealimport": " surreal import --conn http://127.0.0.1:8000 --ns test --db test --user root --pass root ./src/lib/database/database.surql ",
-		"surrealseed": "bun --bun ./src/lib/database/seed.ts"
+		"surrealseed": "bun --bun ./src/lib/database/seed.ts",
+		"surrealstart": "surreal start surrealkv:C:\\surrealdbstorage --strict"
 	},
 	"devDependencies": {
 		"@skeletonlabs/skeleton": "2.10.0",
@@ -47,5 +48,8 @@
 		"@floating-ui/dom": "1.6.5",
 		"lucide-svelte": "^0.379.0",
 		"surrealdb": "^1.0.3"
-	}
+	},
+	"trustedDependencies": [
+		"svelte-preprocess"
+	]
 }
