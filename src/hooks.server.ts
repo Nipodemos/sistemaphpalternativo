@@ -7,7 +7,7 @@ export async function handle({ event, resolve }) {
 		return await resolve(event);
 	} catch (error) {
 		if (error instanceof DatabaseConnectionError) {
-			throw redirect(303, '/login');
+			throw redirect(303, '/');
 		}
 		throw error;
 	}
