@@ -9,15 +9,14 @@ export class DatabaseConnectionError extends Error {
 	}
 }
 
-export async function initDb(): Promise<Surreal> {
-	if (db) return db;
+export async function initDb(): Promise<void> {
+	if (db) return;
 	db = new Surreal();
 	const tentativas = 3;
 	for (let i = 0; i < tentativas; i++) {
 		try {
 			await db.connect('http://127.0.0.1:8000/rpc');
 			await db.use({ namespace: 'test', database: 'test' });
-			return db;
 		} catch (err) {
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			console.error('Failed to connect to SurrealDB:', err);

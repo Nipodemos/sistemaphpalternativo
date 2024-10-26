@@ -1,5 +1,5 @@
 import { RecordId } from 'surrealdb';
-import { initDb } from './connection';
+import { getDb, initDb } from './connection';
 import type { Cidade, Estado, Tela } from './types';
 
 type retornoApiCidade = {
@@ -13,7 +13,8 @@ type retornoApiEstado = {
 };
 
 async function main() {
-	const db = await initDb();
+	await initDb();
+	const db = getDb();
 	if (db === undefined) {
 		throw new Error('sem conexão com o banco de dados');
 	}

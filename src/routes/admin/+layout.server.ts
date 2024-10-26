@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { jsonify } from 'surrealdb';
-import { initDb } from '$lib/database/connection';
+import { getDb } from '$lib/database/connection';
 import type { PermissaoTela, Tela } from '$lib/database/types';
 import { redirect } from '@sveltejs/kit';
 
@@ -14,10 +14,7 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 	}
 	const token = cookies.get('tokenUsuario');
 	if (token) {
-		const db = await initDb();
-		if (!db) {
-			redirect(303, '/');
-		}
+		const db = getDb();
 		try {
 			await db.authenticate(token);
 			const usuario = await db.info();

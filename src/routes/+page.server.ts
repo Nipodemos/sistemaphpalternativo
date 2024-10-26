@@ -1,4 +1,4 @@
-import { initDb } from '$lib/database/connection';
+import { getDb } from '$lib/database/connection';
 import { fail, redirect } from '@sveltejs/kit';
 import { ResponseError } from 'surrealdb';
 import { message, superValidate } from 'sveltekit-superforms';
@@ -14,22 +14,20 @@ export const load = async ({ cookies }) => {
 	const token = cookies.get('tokenUsuario');
 	console.log('token dos cookies :>> ', token);
 	if (token) {
-		const db = await initDb();
+		const db = getDb();
 		let autenticado = false;
-		if (db) {
-			try {
-				autenticado = await db.authenticate(token);
-			} catch (error) {
-				console.log('error :>> ', error);
-				if (error instanceof Error) {
-					console.log('error.message :>> ', error.message);
-					console.log('error.name :>> ', error.name);
-				}
-				console.log('token expirou ou deu erro');
+		try {
+			autenticado = await db.authenticate(token);
+		} catch (error) {
+			console.log('error :>> ', error);
+			if (error instanceof Error) {
+				console.log('error.message :>> ', error.message);
+				console.log('error.name :>> ', error.name);
 			}
-			if (autenticado) {
-				redirect(303, '/admin');
-			}
+			console.log('token expirou ou deu erro');
+		}
+		if (autenticado) {
+			redirect(303, '/admin');
 		}
 	}
 	const form = await superValidate(zod(loginSchema));
@@ -48,7 +46,7 @@ export const actions = {
 		const login = form.data.login;
 		const senha = form.data.senha;
 
-		const db = await initDb();
+		const db = getDb();
 		if (!db) {
 			return fail(503, { form, detalhesErro: 'Serviço indisponível temporariamente' });
 		}
@@ -80,7 +78,7 @@ export const actions = {
 		} catch (error) {
 			console.log('usuário não existe');
 			// console.log('error :>> ', error);
-			if (error instanceof ResponseError) {
+			if (error instanceof Error) {
 				console.log('error cause :>> ', error.cause);
 				console.log('error message :>> ', error.message);
 				console.log('error name :>> ', error.name);
