@@ -1,5 +1,5 @@
 import { getDb } from '$lib/database/connection';
-import { PermissaoTela, type Funcionario, type Tela } from '$lib/database/types';
+import { type Funcionario, type Tela } from '$lib/database/types';
 import { jsonify, StringRecordId } from 'surrealdb';
 import type { PageServerLoad } from './$types';
 import { message, superValidate } from 'sveltekit-superforms';
@@ -14,24 +14,21 @@ type Permissao = {
 	relatorio: boolean;
 };
 
-const PermissaoSchema = z.object({
-	visualizar: z.boolean(),
-	criar: z.boolean(),
-	editar: z.boolean(),
-	deletar: z.boolean(),
-	relatorio: z.boolean()
-});
-
 // Defina o esquema para Funcionario
-const FuncionarioSchema = z.object({
-	id: z.string(),
-	nome: z.string(),
-	// Adicione outras propriedades de Funcionario aqui
-	permissoes: PermissaoSchema
-});
-
-// Defina o esquema para funcionariosFormatado
-const FuncionariosFormatadoSchema = z.array(FuncionarioSchema);
+const formSchema = z.array(
+	z.object({
+		id: z.string(),
+		nome: z.string(),
+		// Adicione outras propriedades de Funcionario aqui
+		permissoes: z.object({
+			visualizar: z.boolean(),
+			criar: z.boolean(),
+			editar: z.boolean(),
+			deletar: z.boolean(),
+			relatorio: z.boolean()
+		})
+	})
+);
 
 export const load: PageServerLoad = async ({ url }) => {
 	const telaID = url.searchParams.get('id');
@@ -41,22 +38,15 @@ export const load: PageServerLoad = async ({ url }) => {
 	let funcionarios = await db.select<Funcionario>('funcionario');
 	funcionarios = jsonify<Funcionario[]>(funcionarios);
 	console.log('telaID :>> ', telaID);
-	let [permissoesTela] = await db.query<[PermissaoTela[]]>(
-		'SELECT * FROM permissaoTela WHERE tela = type::record($telaID) fetch funcionario ',
-		{
-			telaID
-		}
-	);
-	permissoesTela = jsonify<PermissaoTela[]>(permissoesTela);
-	console.log('permissoesTela :>> ', permissoesTela);
 	let dadosDaTela = await db.select<Tela>(new StringRecordId(telaID));
 	dadosDaTela = jsonify<Tela>(dadosDaTela);
 	console.log('tela :>> ', dadosDaTela);
 
 	const funcionariosFormatado = funcionarios.map((funcionario) => {
-		const permissaoTela = permissoesTela.find(
-			(permissao) => permissao.funcionario.id === funcionario.id
+		const permissaoTela = funcionario.permissoesTela.find(
+			(permissao) => permissao.tela.id.toString() === telaID
 		);
+
 		let retorno: Permissao;
 		if (!permissaoTela) {
 			retorno = {
@@ -79,6 +69,6 @@ export const load: PageServerLoad = async ({ url }) => {
 		return funcionario;
 	});
 	console.log('oi');
-	const form = await superValidate(funcionariosFormatado, zod(FuncionariosFormatadoSchema));
+	const form = await superValidate(funcionariosFormatado, zod(formSchema));
 	return { funcionariosFormatado, form, dadosDaTela };
 };
