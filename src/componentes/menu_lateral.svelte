@@ -6,7 +6,6 @@
 	};
 
 	let valueSingle = $page.route.id;
-	console.log('valueSingle :>> ', valueSingle);
 	export let menus: MenuLateral | undefined;
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 </script>
