@@ -1,26 +1,11 @@
 <script lang="ts">
-	import type { Funcionario } from '$lib/database/types.js';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import SuperDebug from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	export let data;
-	const { form } = superForm(data.form);
-	// const funcionarios = data.funcionarios!;
-	const dadosDaTela = data.dadosDaTela!;
-	let permissoes = ['Visualizar', 'Inserir', 'Alterar', 'Excluir', 'Relatório'];
-	const temPermissao = (perm: string, func: Funcionario) => {
-		if (data.dadosDaTela) {
-			let tela = func.permissoesTela.find((p) => p.tela.id == data.dadosDaTela.id);
-			if (tela) {
-				let permissao = tela.permissoes.find((p) => p === perm);
-				if (permissao) {
-					return true;
-				}
-			}
-		}
 
-		return false;
-	};
+	const { form, enhance } = superForm(data.form!, { dataType: 'json' });
+	const dadosDaTela = data.dadosDaTela!;
 </script>
 
 <SuperDebug data={$form} />
@@ -30,28 +15,41 @@
 	</div>
 </div>
 
-<div class="table-container">
+<form method="POST" use:enhance class="table-container">
 	<!-- Native Table Element -->
 	<table class="table table-hover">
 		<thead>
 			<tr>
 				<th>Funcionário</th>
-				{#each permissoes as permissao}
-					<th>{permissao}</th>
-				{/each}
+				<th>Visualizar</th>
+				<th>Criar</th>
+				<th>Editar</th>
+				<th>Deletar</th>
+				<th>Relatório</th>
 			</tr>
 		</thead>
 		<tbody>
-			<!-- {#each funcionarios as funcionario}
+			{#each $form.permissaoPorFuncionario as funcionario}
 				<tr>
-					<td>{funcionario.nome}</td>
-					{#each permissoes as p}
-						<td class="text-left">
-							<SlideToggle name={funcionario.id + ';' + p} checked={temPermissao(p, funcionario)} />
-						</td>
-					{/each}
+					<td>{funcionario.nomeFuncionario}</td>
+					<td class="text-left">
+						<SlideToggle name="visualizar" bind:checked={funcionario.podeVisualizar} />
+					</td>
+					<td class="text-left">
+						<SlideToggle name="criar" bind:checked={funcionario.podeCriar} />
+					</td>
+					<td class="text-left">
+						<SlideToggle name="editar" bind:checked={funcionario.podeEditar} />
+					</td>
+					<td class="text-left">
+						<SlideToggle name="deletar" bind:checked={funcionario.podeDeletar} />
+					</td>
+					<td class="text-left">
+						<SlideToggle name="relatorio" bind:checked={funcionario.podeGerarRelatorio} />
+					</td>
 				</tr>
-			{/each} -->
+			{/each}
 		</tbody>
 	</table>
-</div>
+	<button type="submit" class="btn variant-filled">Salvar</button>
+</form>

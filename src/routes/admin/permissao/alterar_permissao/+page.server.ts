@@ -1,74 +1,120 @@
 import { getDb } from '$lib/database/connection';
-import { type Funcionario, type Tela } from '$lib/database/types';
+import type { Funcionario, Tela } from '$lib/database/types';
 import { jsonify, StringRecordId } from 'surrealdb';
 import type { PageServerLoad } from './$types';
-import { message, superValidate } from 'sveltekit-superforms';
+import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 
-type Permissao = {
-	visualizar: boolean;
-	criar: boolean;
-	editar: boolean;
-	deletar: boolean;
-	relatorio: boolean;
-};
-
-// Defina o esquema para Funcionario
-const formSchema = z.array(
+const permissaoPorFuncionarioSchema = z.array(
 	z.object({
-		id: z.string(),
-		nome: z.string(),
-		// Adicione outras propriedades de Funcionario aqui
-		permissoes: z.object({
-			visualizar: z.boolean(),
-			criar: z.boolean(),
-			editar: z.boolean(),
-			deletar: z.boolean(),
-			relatorio: z.boolean()
-		})
+		idPermissaoTela: z.string().optional(),
+		idFuncionario: z.string(),
+		nomeFuncionario: z.string(),
+		podeVisualizar: z.boolean(),
+		podeCriar: z.boolean(),
+		podeEditar: z.boolean(),
+		podeDeletar: z.boolean(),
+		podeGerarRelatorio: z.boolean()
 	})
 );
+// Defina o esquema para Funcionario
+const formSchema = z.object({
+	idTela: z.string(),
+	permissaoPorFuncionario: permissaoPorFuncionarioSchema
+});
 
 export const load: PageServerLoad = async ({ url }) => {
-	const telaID = url.searchParams.get('id');
-	if (!telaID) return { status: 404 };
+	const idTela = url.searchParams.get('id');
+	if (!idTela) return { status: 404 };
 	const db = getDb();
 
 	let funcionarios = await db.select<Funcionario>('funcionario');
-	funcionarios = jsonify<Funcionario[]>(funcionarios);
-	console.log('telaID :>> ', telaID);
-	let dadosDaTela = await db.select<Tela>(new StringRecordId(telaID));
+
+	let dadosDaTela = await db.select<Tela>(new StringRecordId(idTela));
 	dadosDaTela = jsonify<Tela>(dadosDaTela);
-	console.log('tela :>> ', dadosDaTela);
 
-	const funcionariosFormatado = funcionarios.map((funcionario) => {
-		const permissaoTela = funcionario.permissoesTela.find(
-			(permissao) => permissao.tela.id.toString() === telaID
-		);
+	const permissaoPorFuncionario: z.infer<typeof permissaoPorFuncionarioSchema> = funcionarios.map(
+		(funcionario) => {
+			const permissaoTela = funcionario.permissoesTela.find((permissao) => {
+				return permissao.tela.id.toString() === idTela;
+			});
 
-		let retorno: Permissao;
-		if (!permissaoTela) {
-			retorno = {
-				visualizar: false,
-				criar: false,
-				editar: false,
-				deletar: false,
-				relatorio: false
-			};
-		} else {
-			retorno = {
-				visualizar: permissaoTela.permissoes.includes('visualizar'),
-				criar: permissaoTela.permissoes.includes('criar'),
-				editar: permissaoTela.permissoes.includes('editar'),
-				deletar: permissaoTela.permissoes.includes('deletar'),
-				relatorio: permissaoTela.permissoes.includes('relatorio')
+			return {
+				idPermissaoTela: permissaoTela?.id.toString(),
+				idFuncionario: funcionario.id.toString(),
+				nomeFuncionario: funcionario.nome,
+				podeVisualizar: permissaoTela?.podeVisualizar ?? false,
+				podeCriar: permissaoTela?.podeVisualizar ?? false,
+				podeEditar: permissaoTela?.podeVisualizar ?? false,
+				podeDeletar: permissaoTela?.podeVisualizar ?? false,
+				podeGerarRelatorio: permissaoTela?.podeVisualizar ?? false
 			};
 		}
-		funcionario.permissoes = retorno;
-		return funcionario;
-	});
-	console.log('oi');
-	const form = await superValidate(funcionariosFormatado, zod(formSchema));
-	return { funcionariosFormatado, form, dadosDaTela };
+	);
+
+	const form = await superValidate({ idTela, permissaoPorFuncionario }, zod(formSchema));
+	return { form, dadosDaTela };
+};
+
+interface InsertPermissaoTela {
+	funcionario: StringRecordId;
+	tela: StringRecordId;
+	podeVisualizar: boolean;
+	podeCriar: boolean;
+	podeEditar: boolean;
+	podeDeletar: boolean;
+	podeGerarRelatorio: boolean;
+	[x: string]: unknown;
+}
+
+interface UpdatePermissaoTela {
+	podeVisualizar: boolean;
+	podeCriar: boolean;
+	podeEditar: boolean;
+	podeDeletar: boolean;
+	podeGerarRelatorio: boolean;
+	[x: string]: unknown;
+}
+export const actions = {
+	default: async ({ request }) => {
+		const form = await superValidate(request, zod(formSchema));
+		console.log('form.data.funcionariosFormatado :>> ', form.data.permissaoPorFuncionario);
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const db = getDb();
+		const funcionarios = form.data.permissaoPorFuncionario;
+
+		for (const funcionario of funcionarios) {
+			if (funcionario.idPermissaoTela) {
+				const resultUpdate = await db.update<UpdatePermissaoTela>(
+					new StringRecordId(funcionario.idPermissaoTela),
+					{
+						podeVisualizar: funcionario.podeVisualizar,
+						podeCriar: funcionario.podeCriar,
+						podeEditar: funcionario.podeEditar,
+						podeDeletar: funcionario.podeDeletar,
+						podeGerarRelatorio: funcionario.podeGerarRelatorio
+					}
+				);
+				console.log('resultUpdate :>> ', resultUpdate);
+			} else {
+				const resultInsert = await db.insert<InsertPermissaoTela>('permissaoTela', {
+					funcionario: new StringRecordId(funcionario.idFuncionario),
+					tela: new StringRecordId(form.data.idTela),
+					podeVisualizar: funcionario.podeVisualizar,
+					podeCriar: funcionario.podeCriar,
+					podeEditar: funcionario.podeEditar,
+					podeDeletar: funcionario.podeDeletar,
+					podeGerarRelatorio: funcionario.podeGerarRelatorio
+				});
+				console.log('resultInsert :>> ', resultInsert);
+			}
+		}
+
+		return message(form, 'Form posted successfully!');
+	}
 };
