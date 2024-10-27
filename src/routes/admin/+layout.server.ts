@@ -21,13 +21,11 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 			console.log({ usuario });
 			if (usuario) {
 				const [permissoes] = await db.query<[PermissaoTela[]]>(`
-				SELECT tela FROM permissaoTela
-				WHERE
-					usuario.id = $auth.id AND
-					permissao = 'visualizar'
-				fetch tela,usuario
-			`);
-				console.log(permissoes[0]);
+					SELECT tela FROM permissaoTela
+					WHERE
+						funcionario.id = $auth.funcionario.id AND
+						permissao = 'visualizar'
+				`);
 
 				const menus: MenuLateral = {};
 				permissoes.forEach((permissao) => {
