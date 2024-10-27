@@ -337,7 +337,7 @@ PERMISSIONS
 
 DEFINE FIELD OVERWRITE email 								ON usuario TYPE string | null ASSERT string::is::email($value) || $value == null;
 //DEFINE FIELD OVERWRITE empresa 							ON usuario TYPE record<empresa> ;
-//DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
+DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
 	DEFINE FIELD OVERWRITE nivelPermissao				ON usuario TYPE number ASSERT $value > 0;
@@ -368,16 +368,22 @@ DEFINE TABLE permissaoTela SCHEMAFULL
 		FOR DELETE NONE
 ;
 //DEFINE FIELD OVERWRITE usuario							ON permissaoTela TYPE record<usuario>;
-REMOVE FIELD usuario ON permissaoTela;
 DEFINE FIELD OVERWRITE funcionario					ON permissaoTela TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela>;
 //DEFINE FIELD OVERWRITE permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
-REMOVE FIELD permissao ON permissaoTela;
-DEFINE FIELD OVERWRITE permissoes 					ON permissaoTela TYPE array<'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio'>;
+//DEFINE FIELD OVERWRITE permissoes 					ON permissaoTela TYPE array<'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio'>;
+DEFINE FIELD OVERWRITE podeVisualizar				ON permissaoTela TYPE bool DEFAULT false;
+DEFINE FIELD OVERWRITE podeCriar						ON permissaoTela TYPE bool DEFAULT false;
+DEFINE FIELD OVERWRITE podeEditar						ON permissaoTela TYPE bool DEFAULT false;
+DEFINE FIELD OVERWRITE podeDeletar					ON permissaoTela TYPE bool DEFAULT false;
+DEFINE FIELD OVERWRITE podeGerarRelatorio				ON permissaoTela TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON permissaoTela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON permissaoTela TYPE datetime | null DEFAULT null;
 
+REMOVE FIELD usuario ON permissaoTela;
+REMOVE FIELD permissao ON permissaoTela;
+REMOVE FIELD permissoes ON permissaoTela;
 DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao UNIQUE;
 
 DEFINE TABLE movimentacaoEstoque SCHEMAFULL TYPE NORMAL
