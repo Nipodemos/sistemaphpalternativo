@@ -15,83 +15,48 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 	const token = cookies.get('tokenUsuario');
 	if (token) {
 		const db = getDb();
-		try {
-			await db.authenticate(token);
-			const usuario = await db.info();
-			console.log({ usuario });
-			if (usuario) {
-				const [permissoes] = await db.query<[PermissaoTela[]]>(`
-					SELECT tela FROM permissaoTela
-					WHERE
-						funcionario.id = $auth.funcionario.id AND
-						permissao = 'visualizar'
-				`);
-
-				const menus: MenuLateral = {};
-				permissoes.forEach((permissao) => {
-					let tela = permissao.tela;
-					if (!menus[tela.menu]) {
-						menus[tela.menu] = [];
-					}
-					tela = jsonify(tela);
-					menus[tela.menu].push(tela);
-				});
-				return {
-					menus
-				};
+		const autenticado = await db.authenticate(token)
+		
+		
+		if (autenticado) {
+			try {
+				const usuario = await db.info();
+				if (usuario) {
+					const [permissoes] = await db.query<[PermissaoTela[]]>(`
+						SELECT tela.*
+						FROM permissaoTela
+						WHERE funcionario.id = $auth.funcionario.id
+							AND podeVisualizar = true
+						FETCH tela
+					`);
+					
+					const menus: MenuLateral = {};
+					permissoes.forEach((permissao) => {
+						let tela = permissao.tela;
+						if (!menus[tela.menu]) {
+							menus[tela.menu] = [];
+						}
+						tela = jsonify(tela);
+						menus[tela.menu].push(tela);
+					});
+					return {
+						menus
+					};
+				}
+			} 
+			catch (error) {
+				if (error instanceof Error) {
+					console.log('error.message :>> ', error.message);
+					console.log('error.name :>> ', error.name);
+				}
+				console.log('falha na autenticação do token, voltando para tela de login');
+				redirect(303, '/');
 			}
-		} catch (error) {
-			if (error instanceof Error) {
-				console.log('error.message :>> ', error.message);
-				console.log('error.name :>> ', error.name);
-			}
-			console.log('falha na autenticação do token, voltando para tela de login');
+		}
+		else {
 			redirect(303, '/');
 		}
 	} else {
 		redirect(303, '/');
 	}
-
-	// const token = await db.signin({
-	// 	username: 'root',
-	// 	password: 'root'
-	// });
-	// console.log({ token });
-	// const user = await db.info();
-	// console.log({ user });
-	// let telas: Jsonify<Tela>[] = [];
-
-	// if (user) {
-	// 	const permissoes = db.query<PermissaoTela[]>(`
-	// 		SELECT * FROM permissaoTela
-	// 		WHERE
-	// 			usuario.id = $auth.id AND
-	// 			lojista = $auth.lojista AND
-	// 			permissao = 'visualizar'
-	// 		fetch tela,usuario
-	// 	`);
-	// 	console.log({ permissoes });
-	// 	telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
-	// } else {
-	// 	telas = jsonify<Tela[]>(await db.select<Tela>('tela'));
-	// }
-
-	// console.log({ telas });
-
-	// const menus: MenuLateral = {};
-	// telas.forEach((tela) => {
-	// 	if (!menus[tela.menu]) {
-	// 		menus[tela.menu] = [];
-	// 	}
-	// 	menus[tela.menu].push(tela);
-	// });
-
-	// const retorno = await fetch('/api/pegar_estados');
-	// const estados = await retorno.json();
-
-	// return {
-	// 	telas,
-	// 	menus,
-	// 	estados
-	// };
 };

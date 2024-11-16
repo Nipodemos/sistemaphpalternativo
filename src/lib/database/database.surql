@@ -201,8 +201,8 @@ DEFINE FIELD OVERWRITE codigo								ON cor TYPE number READONLY DEFAULT {
 	RETURN $max_codigo+1;
 };
 DEFINE FIELD OVERWRITE fantasia							ON empresa TYPE string ASSERT string::len($value) > 2;
-DEFINE FIELD OVERWRITE cnpj									ON empresa TYPE string ASSERT string::len($value) == 14;
-DEFINE FIELD OVERWRITE inscricaoEstadual		ON empresa TYPE string ASSERT string::len($value) < 20;
+DEFINE FIELD OVERWRITE cnpj									ON empresa TYPE string ASSERT string::len($value) == 18;
+DEFINE FIELD OVERWRITE inscricaoEstadual		ON empresa TYPE string | null;
 DEFINE FIELD OVERWRITE enderecoCompleto			ON empresa VALUE <future> {
 	let $empresa = id;
 	RETURN (SELECT * FROM enderecoCompleto WHERE dono = $empresa)
@@ -263,6 +263,7 @@ DEFINE FIELD OVERWRITE telefone2						ON funcionario TYPE string | null DEFAULT 
 DEFINE FIELD OVERWRITE email								ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE apelido							ON funcionario TYPE string | null DEFAULT null;
 DEFINE FIELD OVERWRITE comissao							ON funcionario TYPE number ASSERT $value >= 0 && $value <= 1;
+DEFINE FIELD OVERWRITE nivelPermissao				ON funcionario TYPE number ASSERT $value > 0;
 DEFINE FIELD OVERWRITE admitidoEm						ON funcionario TYPE datetime;
 DEFINE FIELD OVERWRITE demitidoEm						ON funcionario TYPE datetime | null DEFAULT null;
 DEFINE FIELD OVERWRITE criadoEm							ON funcionario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
@@ -340,7 +341,7 @@ DEFINE FIELD OVERWRITE email 								ON usuario TYPE string | null ASSERT string
 DEFINE FIELD OVERWRITE funcionario 					ON usuario TYPE record<funcionario>;
 DEFINE FIELD OVERWRITE login								ON usuario TYPE string ASSERT string::len($value) > 2;
 DEFINE FIELD OVERWRITE senha 								ON usuario TYPE string ASSERT string::len($value) > 6;
-	DEFINE FIELD OVERWRITE nivelPermissao				ON usuario TYPE number ASSERT $value > 0;
+REMOVE FIELD nivelPermissao									ON usuario;
 DEFINE FIELD OVERWRITE criadoEm 						ON usuario TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON usuario TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON usuario TYPE datetime | null DEFAULT null;
@@ -372,11 +373,12 @@ DEFINE FIELD OVERWRITE funcionario					ON permissaoTela TYPE record<funcionario>
 DEFINE FIELD OVERWRITE tela									ON permissaoTela TYPE record<tela>;
 //DEFINE FIELD OVERWRITE permissao						ON permissaoTela TYPE string ASSERT $value INSIDE ['visualizar','criar','editar','deletar','relatorio'];
 //DEFINE FIELD OVERWRITE permissoes 					ON permissaoTela TYPE array<'visualizar' | 'criar' | 'editar' | 'deletar' | 'relatorio'>;
+DEFINE FIELD OVERWRITE permissoesExtras			ON permissaoTela TYPE string | NULL DEFAULT null;
 DEFINE FIELD OVERWRITE podeVisualizar				ON permissaoTela TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE podeCriar						ON permissaoTela TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE podeEditar						ON permissaoTela TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE podeDeletar					ON permissaoTela TYPE bool DEFAULT false;
-DEFINE FIELD OVERWRITE podeGerarRelatorio				ON permissaoTela TYPE bool DEFAULT false;
+DEFINE FIELD OVERWRITE podeGerarRelatorio		ON permissaoTela TYPE bool DEFAULT false;
 DEFINE FIELD OVERWRITE criadoEm 						ON permissaoTela TYPE datetime VALUE $before OR time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE atualizadoEm 				ON permissaoTela TYPE datetime VALUE time::now() DEFAULT time::now() READONLY;
 DEFINE FIELD OVERWRITE canceladoEm 					ON permissaoTela TYPE datetime | null DEFAULT null;
@@ -384,6 +386,7 @@ DEFINE FIELD OVERWRITE canceladoEm 					ON permissaoTela TYPE datetime | null DE
 REMOVE FIELD usuario ON permissaoTela;
 REMOVE FIELD permissao ON permissaoTela;
 REMOVE FIELD permissoes ON permissaoTela;
+REMOVE FIELD permissoes[*] ON permissaoTela;
 DEFINE INDEX usuario_tela_unico ON permissaoTela FIELDS usuario,tela,permissao UNIQUE;
 
 DEFINE TABLE movimentacaoEstoque SCHEMAFULL TYPE NORMAL

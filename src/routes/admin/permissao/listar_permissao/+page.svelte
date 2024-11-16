@@ -19,12 +19,6 @@
 	<div class="mb-8">
 		<h2 class="h2">Cadastro de permissões</h2>
 	</div>
-	<div class="flex-1"></div>
-	<div class=" text-right">
-		<a href="/admin/permissao/cadastrar_permissao" class="btn variant-filled-primary">
-			Adicionar <i class="ml-2 fa-solid fa-plus"></i>
-		</a>
-	</div>
 </div>
 
 <div class="row mb-5">
@@ -64,7 +58,12 @@
 						</a>
 					</td>
 				</tr>
+			{:else}
+				<tr>
+					<td colspan="3" class="text-error-300" ><p>Nenhuma tela encontrada com a pesquisa informada!</p></td>
+				</tr>
 			{/each}
+		  
 		</tbody>
 		<tfoot>
 			<tr>

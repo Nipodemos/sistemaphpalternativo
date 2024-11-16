@@ -1,10 +1,27 @@
 <script lang="ts">
-	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import { getToastStore, SlideToggle } from '@skeletonlabs/skeleton';
 	import SuperDebug from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
+	import { goto } from '$app/navigation';
 	export let data;
 
-	const { form, enhance } = superForm(data.form!, { dataType: 'json' });
+	const toastStore = getToastStore();
+	const { form, enhance } = superForm(data.form!, { 
+		dataType: 'json',
+		onUpdated: ({ form }) => {
+			if (form.valid) {
+				// Show success toast
+				toastStore.trigger({
+					message: 'Permissões alteradas com sucesso!',
+					background: 'variant-filled-success'
+				});
+				// Redirect after a short delay
+				setTimeout(() => {
+					goto('/admin/listar_permissao');
+				}, 750);
+			}
+		} 
+	});
 	const dadosDaTela = data.dadosDaTela!;
 </script>
 

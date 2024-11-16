@@ -19,6 +19,7 @@
 			elemPage.scrollTop = 0;
 		}
 	});
+	
 </script>
 
 <AppShell slotSidebarLeft="w-60" slotPageContent="p-4 bg-slate-400">
@@ -31,9 +32,7 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="sidebarLeft">
-		{#if url !== '/login'}
-			<MenuLateral {menus} />
-		{/if}
+		<MenuLateral {menus} />
 	</svelte:fragment>
 	<!-- (sidebarRight) -->
 	<!-- (pageHeader) -->
