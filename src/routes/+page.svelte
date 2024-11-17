@@ -2,12 +2,12 @@
 	import '../app.css';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { goto } from '$app/navigation';
-	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
 	export let data;
 
 	const toastStore = getToastStore();
 
-	const { form, errors, enhance } = superForm(data.form, {
+	const { form, errors, enhance,submitting } = superForm(data.form, {
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
 				// Show success toast
@@ -48,7 +48,12 @@
 				{/each}
 			{/if}
 
-			<button type="submit" class="btn variant-filled-primary w-full mt-4">Login</button>
+			<button type="submit" class="btn variant-filled-primary w-full mt-4">
+				{#if $submitting}
+					<span><ProgressRadial font={16} width="w-8" class="mr-2" /></span>
+				{/if}
+				Login
+			</button>
 		</form>
 	</div>
 </div>
