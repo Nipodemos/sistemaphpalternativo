@@ -1,6 +1,6 @@
 import { getDb } from '$lib/database/connection';
 import type { Funcionario, Tela } from '$lib/database/types';
-import { jsonify, StringRecordId, surql } from 'surrealdb';
+import { jsonify, StringRecordId } from 'surrealdb';
 import type { PageServerLoad } from './$types';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -130,12 +130,11 @@ export const actions = {
 			}
 		}
 		catch (error) {
-			fail()
+			fail(400, {form})
 		}
 
 		
 
-		await invalidate('/admin');
 		return message(form, 'Form posted successfully!');
 	}
 };

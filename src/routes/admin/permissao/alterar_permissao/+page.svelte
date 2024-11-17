@@ -2,7 +2,7 @@
 	import { getToastStore, SlideToggle } from '@skeletonlabs/skeleton';
 	import SuperDebug from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	export let data;
 
 	const toastStore = getToastStore();
@@ -16,8 +16,9 @@
 					background: 'variant-filled-success'
 				});
 				// Redirect after a short delay
-				setTimeout(() => {
-					goto('/admin/listar_permissao');
+				setTimeout(async () => {
+					await invalidate('/admin');
+					await goto('/admin/listar_permissao');
 				}, 750);
 			}
 		} 
