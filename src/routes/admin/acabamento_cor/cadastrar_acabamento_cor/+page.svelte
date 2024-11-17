@@ -1,0 +1,59 @@
+<script lang="ts">
+	import '../app.css';
+	import { superForm } from 'sveltekit-superforms/client';
+	import { goto } from '$app/navigation';
+	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
+	export let data;
+
+	const toastStore = getToastStore();
+
+	const { form, errors, enhance, constraints,submitting } = superForm(data.form, {
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
+				// Show success toast
+				toastStore.trigger({
+					message: 'Login realizado com sucesso!',
+					background: 'variant-filled-success'
+				});
+				// Redirect after a short delay
+				setTimeout(() => {
+					goto('/admin');
+				}, 750);
+			}
+		}
+	});
+</script>
+
+<div class="container h-full mx-auto flex justify-center items-center">
+	<div class="card p-4 w-full max-w-sm">
+		<h2 class="h2 mb-4">Login</h2>
+		<form method="POST" use:enhance>
+			<label class="label">
+				<span>Email ou login</span>
+				<input class="input" type="text" name="login" {...$constraints.filtro} bind:value={$form.filtro} />
+			</label>
+			{#if $errors.login}
+				{#each $errors.login as erro}
+					<p class="text-error-500">{erro}</p>
+				{/each}
+			{/if}
+
+			<label class="label mt-4">
+				<span>Senha</span>
+				<input class="input" type="password" name="senha" bind:value={$form.senha} />
+			</label>
+			{#if $errors.senha}
+				{#each $errors.senha as erro}
+					<p class="text-error-500">{erro}</p>
+				{/each}
+			{/if}
+
+			<button type="submit" class="btn variant-filled-primary w-full mt-4">
+				{#if $submitting}
+					<span><ProgressRadial font={16} width="w-8" class="mr-2" /></span>
+				{/if}
+				<span>Login</span>
+			</button>
+		</form>
+	</div>
+</div>
