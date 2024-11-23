@@ -2,8 +2,6 @@
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
-	import { Contact, Users } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	export let data: PageData;
 	let tabSet: number = 1;

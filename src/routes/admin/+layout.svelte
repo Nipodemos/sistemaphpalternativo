@@ -7,6 +7,7 @@
 
 	import { page } from '$app/stores';
 	import MenuLateral from '../../componentes/menu_lateral.svelte';
+	import { ToastProvider } from '@skeletonlabs/skeleton-svelte';
 
 	const url = $page.url.pathname;
 	export let data;
@@ -19,9 +20,12 @@
 			elemPage.scrollTop = 0;
 		}
 	});
-	
+
 </script>
 
+<ToastProvider>
+	{@render children()}
+</ToastProvider>
 <AppShell slotSidebarLeft="w-60" slotPageContent="p-4 bg-slate-400">
 	<svelte:fragment slot="header">
 		<AppBar>

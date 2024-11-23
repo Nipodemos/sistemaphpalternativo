@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { initializeStores, Toast } from '@skeletonlabs/skeleton';
-	initializeStores();
+	import '../app.css';
+	import { ToastProvider } from '@skeletonlabs/skeleton-svelte';
+	let { children } = $props();
 </script>
 
-<Toast />
-
-<slot></slot>
+<ToastProvider>
+	{@render children()}
+</ToastProvider>

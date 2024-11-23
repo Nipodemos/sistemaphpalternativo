@@ -2,30 +2,48 @@
 	import '../app.css';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { goto } from '$app/navigation';
-	import { getToastStore, ProgressRadial } from '@skeletonlabs/skeleton';
-	export let data;
+	import { getContext } from 'svelte';
+	import { type ToastContext } from '@skeletonlabs/skeleton-svelte';
+	import type { PageData } from './$types';
+	import SuperDebug from 'sveltekit-superforms';
+	type Props = {
+		data: PageData;
+	};
 
-	const toastStore = getToastStore();
+	let carregando = $state(false);
+	let { data }: Props = $props();
+	export const toast: ToastContext = getContext('toast');
 
-	const { form, errors, enhance,submitting } = superForm(data.form, {
+	const { form, errors, enhance, submitting } = superForm(data.form, {
 		onResult: ({ result }) => {
+			console.log({ result });
 			if (result.type === 'success') {
-				// Show success toast
-				toastStore.trigger({
-					message: 'Login realizado com sucesso!',
-					background: 'variant-filled-success'
+				carregando = true;
+				toast.create({
+					title: 'Sucesso',
+					description: 'Login realizado com sucesso!',
+					type: 'success'
 				});
 				// Redirect after a short delay
 				setTimeout(() => {
 					goto('/admin');
-				}, 750);
+				}, 200);
+			} else {
+				toast.create({
+					title: 'Erro',
+					description: 'Login ou senha inválidos',
+					type: 'error'
+				});
 			}
 		}
 	});
 </script>
 
-<div class="container h-full mx-auto flex justify-center items-center">
-	<div class="card p-4 w-full max-w-sm">
+<SuperDebug data={$form} />
+<div class="flex h-screen items-center justify-center">
+	<div
+		class="card w-full max-w-sm border p-4 text-center border-surface-200-800 preset-filled-surface-100-900"
+	>
 		<h2 class="h2 mb-4">Login</h2>
 		<form method="POST" use:enhance>
 			<label class="label">
@@ -37,7 +55,6 @@
 					<p class="text-error-500">{erro}</p>
 				{/each}
 			{/if}
-
 			<label class="label mt-4">
 				<span>Senha</span>
 				<input class="input" type="password" name="senha" bind:value={$form.senha} />
@@ -47,12 +64,10 @@
 					<p class="text-error-500">{erro}</p>
 				{/each}
 			{/if}
-
-			<button type="submit" class="btn variant-filled-primary w-full mt-4">
+			<button type="submit" class="btn mt-4 w-full preset-filled">
 				{#if $submitting}
-					<span><ProgressRadial font={16} width="w-8" class="mr-2" /></span>
-				{/if}
-				Login
+					<span> <i class="fas fa-spinner fa-spin"></i> </span>
+				{/if} <span>Login</span>
 			</button>
 		</form>
 	</div>

@@ -1,6 +1,5 @@
 import { getDb } from '$lib/database/connection';
 import { fail, redirect } from '@sveltejs/kit';
-import { ResponseError } from 'surrealdb';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
