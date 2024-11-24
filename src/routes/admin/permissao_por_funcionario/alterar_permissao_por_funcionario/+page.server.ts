@@ -1,6 +1,6 @@
 import { getDb } from '$lib/database/connection';
 import type { Funcionario, Tela } from '$lib/database/types';
-import { jsonify, StringRecordId } from 'surrealdb';
+import { jsonify, RecordId, StringRecordId } from 'surrealdb';
 import type { PageServerLoad } from './$types';
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -9,8 +9,6 @@ import { z } from 'zod';
 const permissaoPorFuncionarioSchema = z.array(
 	z.object({
 		idPermissaoTela: z.string().optional(),
-		idFuncionario: z.string(),
-		nomeFuncionario: z.string(),
 		podeVisualizar: z.boolean(),
 		podeCriar: z.boolean(),
 		podeEditar: z.boolean(),
@@ -20,41 +18,24 @@ const permissaoPorFuncionarioSchema = z.array(
 );
 // Defina o esquema para Funcionario
 const formSchema = z.object({
-	idTela: z.string(),
-	permissaoPorFuncionario: permissaoPorFuncionarioSchema
+	nome: z.string(),
+	cpfcnpj: z.string(),
+	pessoa: z.string(),
+	nascimento: z.date(),
+	
+	permissoesTela: PermissaoTela[];
 });
 
 export const load: PageServerLoad = async ({ url }) => {
-	const idTela = url.searchParams.get('id');
-	if (!idTela) return { status: 404 };
+	const idFuncionario = url.searchParams.get('id');
+	if (!idFuncionario) return { status: 404 };
 	const db = getDb();
 
-	const funcionarios = await db.select<Funcionario>('funcionario');
+	const funcionario = await db.select<Funcionario>(new StringRecordId(idFuncionario));
+	if (!funcionario) return { status: 404 };
 
-	let dadosDaTela = await db.select<Tela>(new StringRecordId(idTela));
-	dadosDaTela = jsonify<Tela>(dadosDaTela);
-
-	const permissaoPorFuncionario: z.infer<typeof permissaoPorFuncionarioSchema> = funcionarios.map(
-		(funcionario) => {
-			const permissaoTela = funcionario.permissoesTela.find((permissao) => {
-				return permissao.tela.toString() === idTela;
-			});
-
-			return {
-				idPermissaoTela: permissaoTela?.id.toString(),
-				idFuncionario: funcionario.id.toString(),
-				nomeFuncionario: funcionario.nome,
-				podeVisualizar: permissaoTela?.podeVisualizar ?? false,
-				podeCriar: permissaoTela?.podeVisualizar ?? false,
-				podeEditar: permissaoTela?.podeVisualizar ?? false,
-				podeDeletar: permissaoTela?.podeVisualizar ?? false,
-				podeGerarRelatorio: permissaoTela?.podeVisualizar ?? false
-			};
-		}
-	);
-
-	const form = await superValidate({ idTela, permissaoPorFuncionario }, zod(formSchema));
-	return { form, dadosDaTela };
+	const form = await superValidate({}, zod(formSchema));
+	return { form };
 };
 
 interface InsertPermissaoTela {
@@ -127,7 +108,7 @@ export const actions = {
 					console.log('resultInsert :>> ', resultInsert);
 				}
 			}
-		} catch (_) {
+		} catch (error) {
 			fail(400, { form });
 		}
 

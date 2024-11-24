@@ -48,13 +48,13 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each funcionariosFiltrados as tela}
+			{#each funcionariosFiltrados as funcionario}
 				<tr>
-					<td>{tela.menu}</td>
-					<td>{tela.submenu}</td>
+					<td>{funcionario.menu}</td>
+					<td>{funcionario.submenu}</td>
 					<td class="text-center">
 						<a
-							href="/admin/permissao/alterar_permissao?id={tela.id}"
+							href="/admin/permissao_por_funcionario/alterar_permissao_por_funcionario?id={funcionario.id}"
 							class="variant-filled btn-icon"
 							aria-label="Editar"
 						>
