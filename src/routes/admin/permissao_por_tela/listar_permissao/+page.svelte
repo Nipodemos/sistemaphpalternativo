@@ -36,7 +36,7 @@
 </div>
 <div class="table-container">
 	<!-- Native Table Element -->
-	<table class="table table-hover">
+	<table class="table-hover table">
 		<thead>
 			<tr>
 				<th>Menu</th>
@@ -52,7 +52,8 @@
 					<td class="text-center">
 						<a
 							href="/admin/permissao/alterar_permissao?id={tela.id}"
-							class="btn-icon variant-filled"
+							class="variant-filled btn-icon"
+							aria-label="Editar"
 						>
 							<i class="fa fa-pencil"></i>
 						</a>
@@ -60,10 +61,11 @@
 				</tr>
 			{:else}
 				<tr>
-					<td colspan="3" class="text-error-300" ><p>Nenhuma tela encontrada com a pesquisa informada!</p></td>
+					<td colspan="3" class="text-error-300"
+						><p>Nenhuma tela encontrada com a pesquisa informada!</p></td
+					>
 				</tr>
 			{/each}
-		  
 		</tbody>
 		<tfoot>
 			<tr>
