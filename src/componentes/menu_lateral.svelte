@@ -7,31 +7,47 @@
 
 	let valueSingle = $page.route.id;
 	export let menus: MenuLateral | undefined;
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion, Navigation } from '@skeletonlabs/skeleton-svelte';
 </script>
 
 {#if menus}
 	<Accordion>
 		{#each Object.keys(menus) as menu}
-			<AccordionItem>
-				<svelte:fragment slot="lead"><i class={menus[menu][0].icone}></i></svelte:fragment>
-				<svelte:fragment slot="summary">{menu}</svelte:fragment>
-				<svelte:fragment slot="content">
-					<nav class="list-nav">
+			<Accordion.Item panelPadding={'p-0'} panelClasses={'overflow-hidden'} value={menu}>
+				{#snippet lead()}
+					<i class={menus[menu][0].icone}></i>
+				{/snippet}
+				{#snippet control()}{menu}{/snippet}
+				{#snippet panel()}
+					{#each menus[menu] as dadosMenu (dadosMenu.id)}
+						<Navigation.Rail expanded>
+							{#snippet tiles()}
+								<Navigation.Tile
+									id="0"
+									labelExpanded={dadosMenu.submenu}
+									href={dadosMenu.url}
+								>
+									<i class="fa-solid fa-arrow-right"></i>
+								</Navigation.Tile>
+							{/snippet}
+						</Navigation.Rail>
+					{/each}
+					<!-- <nav class="list-nav">
 						<ul>
-							{#each menus[menu] as dadosMenu (dadosMenu.id)}
-								<li>
-									<a href={dadosMenu.url} class="chip variant-soft hover:variant-tertiary">
-										<span>{dadosMenu.submenu}</span>
-										<span class="flex-1"></span>
-										<i class="fa-solid fa-arrow-right"></i>
-									</a>
-								</li>
-							{/each}
+							<li>
+								<a
+									href={dadosMenu.url}
+									class="variant-soft hover:variant-tertiary chip"
+								>
+									<span>{dadosMenu.submenu}</span>
+									<span class="flex-1"></span>
+									<i class="fa-solid fa-arrow-right"></i>
+								</a>
+							</li>
 						</ul>
-					</nav>
-				</svelte:fragment>
-			</AccordionItem>
+					</nav> -->
+				{/snippet}
+			</Accordion.Item>
 		{/each}
 	</Accordion>
 {/if}
