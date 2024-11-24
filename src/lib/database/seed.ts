@@ -66,10 +66,17 @@ async function main() {
 		},
 		{
 			menu: 'Usuários',
-			submenu: 'Permissões de tela',
+			submenu: 'Permissões por tela',
 			id: 'permissaoTela',
 			icone: 'fa fa-user',
-			url: '/admin/permissao/listar_permissao'
+			url: '/admin/permissao_por_tela/listar_permissao'
+		},
+		{
+			menu: 'Usuários',
+			submenu: 'Permissões por tela',
+			id: 'permissaoFuncionario',
+			icone: 'fa fa-user',
+			url: '/admin/permissao_por_tela/listar_permissao'
 		}
 	];
 
@@ -133,7 +140,9 @@ async function main() {
 			// console.log('cidadeExiste :>> ', cidadeExiste);
 			// checar se cidade existe antes de inserir
 			if (cidadeExiste) {
-				console.log('        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge);
+				console.log(
+					'        cidade já existe: ' + cidade.nome + ' - ' + cidade.codigo_ibge
+				);
 				continue;
 			}
 			const resultInsert = await db.insert('cidade', {
@@ -146,7 +155,10 @@ async function main() {
 				throw new Error('        Erro ao inserir cidade');
 			} else {
 				console.log(
-					'        cidade inserida com sucesso: ' + cidade.nome + ' - ' + cidade.codigo_ibge
+					'        cidade inserida com sucesso: ' +
+						cidade.nome +
+						' - ' +
+						cidade.codigo_ibge
 				);
 			}
 		}
